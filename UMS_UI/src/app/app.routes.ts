@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { AddEditUserComponent } from './core/components/add-edit-user/add-edit-user.component';
+import { AddEditUserComponent } from './features/users/components/add-edit-user/add-edit-user.component';
 
 export const routes: Routes = [
 
@@ -10,11 +10,11 @@ export const routes: Routes = [
     },
     {
         path: 'Ums/user',
-        loadComponent: () => import('./core/components/user/user.component').then(m => m.UserComponent)
+        loadComponent: () => import('./features/users/components/user/user.component').then(m => m.UserComponent)
     },
     {
         path: 'Ums/adduser',
-        loadComponent: () => import('./core/components/add-edit-user/add-edit-user.component').then(m => m.AddEditUserComponent)
+        loadComponent: () => import('./features/users/components/add-edit-user/add-edit-user.component').then(m => m.AddEditUserComponent)
     },
     {
         path: '**',

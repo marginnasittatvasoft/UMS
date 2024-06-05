@@ -1,0 +1,164 @@
+<div class="container mt-3" *ngIf="!isDialogMode">
+    <div class="d-flex justify-content-between mb-5">
+        <h1>Add User</h1>
+        <a mat-raised-button routerLink="/Ums/home">
+            <mat-icon>arrow_back</mat-icon> Back
+        </a>
+    </div>
+    <ng-container *ngTemplateOutlet="userFormTemplate"> </ng-container>
+
+</div>
+
+<div class="container mt-3" *ngIf="isDialogMode">
+    <div class="d-flex justify-content-between">
+        <h2 mat-dialog-title>Edit User</h2>
+        <button mat-icon-button mat-dialog-close aria-label="Close">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <mat-dialog-content>
+        <ng-container *ngTemplateOutlet="userFormTemplate"></ng-container>
+    </mat-dialog-content>
+
+    <mat-dialog-actions class="d-flex justify-content-end mb-2">
+        <button mat-raised-button color="warn"
+            mat-dialog-close>Cancel</button>
+        <button mat-raised-button color="accent" type="submit"
+            [disabled]="addUserForm.invalid" (click)="onSubmit()" mat-dialog-close>Save</button>
+    </mat-dialog-actions>
+
+</div>
+
+<ng-template #userFormTemplate>
+    <form [formGroup]="addUserForm">
+        <div class="row">
+            <input matInput formControlName="id" hidden />
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName" />
+                <mat-error
+                    *ngIf="addUserForm.get('firstName')?.invalid && addUserForm.get('firstName')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('firstName')?.errors?.['required']">First
+                        Name is required</span>
+                    <span
+                        *ngIf="addUserForm.get('firstName')?.errors?.['maxlength']">First
+                        Name cannot exceed 20 characters</span>
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName" />
+                <mat-error
+                    *ngIf="addUserForm.get('lastName')?.invalid && addUserForm.get('lastName')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('lastName')?.errors?.['required']">Last
+                        Name is required</span>
+                    <span
+                        *ngIf="addUserForm.get('lastName')?.errors?.['maxlength']">Last
+                        Name cannot exceed 20 characters</span>
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="row">
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>Email</mat-label>
+                <input matInput type="email" formControlName="email" />
+                <mat-error
+                    *ngIf="addUserForm.get('email')?.invalid && addUserForm.get('email')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('email')?.errors?.['required']">Email
+                        is required</span>
+                    <span
+                        *ngIf="addUserForm.get('email')?.errors?.['email']">Invalid
+                        email format</span>
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phone" />
+                <mat-error
+                    *ngIf="addUserForm.get('phone')?.invalid && addUserForm.get('phone')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('phone')?.errors?.['phone']">phone
+                        Number is required</span>
+
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="row">
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>Street</mat-label>
+                <input matInput type="text"
+                    formControlName="street" />
+                <mat-error
+                    *ngIf="addUserForm.get('street')?.invalid && addUserForm.get('street')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('street')?.errors?.['required']">street
+                        is required</span>
+                    <span
+                        *ngIf="addUserForm.get('street')?.errors?.['maxlength']">street
+                        cannot exceed 150 characters</span>
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>City</mat-label>
+                <input matInput type="text" formControlName="city" />
+            </mat-form-field>
+        </div>
+        <div class="row">
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>State</mat-label>
+                <input matInput type="text"
+                    formControlName="state" />
+            </mat-form-field>
+
+            <mat-form-field class="mb-3 col" appearance="fill">
+                <mat-label>User Name</mat-label>
+                <input matInput type="text" formControlName="userName" />
+                <mat-error
+                    *ngIf="addUserForm.get('userName')?.invalid && addUserForm.get('userName')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('userName')?.errors?.['required']">User
+                        Name
+                        is required</span>
+                    <span
+                        *ngIf="addUserForm.get('userName')?.errors?.['maxlength']">User
+                        Name
+                        cannot exceed 20 characters</span>
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="row">
+            <mat-form-field class="mb-3 col-6" appearance="fill">
+                <mat-label>Password</mat-label>
+                <input matInput type="text" formControlName="password" />
+                <mat-error
+                    *ngIf="addUserForm.get('password')?.invalid && addUserForm.get('password')?.touched">
+                    <span
+                        *ngIf="addUserForm.get('password')?.errors?.['required']">Password
+                        is required</span>
+                    <span
+                        *ngIf="addUserForm.get('password')?.errors?.['maxlength']">Password
+                        cannot exceed 20 characters</span>
+                    <span
+                        *ngIf="addUserForm.get('password')?.errors?.['minlength']">Password
+                        minimum 6 characters required</span>
+                </mat-error>
+            </mat-form-field>
+        </div>
+        <div class="d-flex justify-content-end" *ngIf="!isDialogMode">
+            <button mat-raised-button color="warn" class="me-2">Cancel</button>
+            <button mat-raised-button color="primary"
+                type="submit" (click)="onSubmit()">Save</button>
+        </div>
+
+    </form>
+</ng-template>

@@ -39,7 +39,7 @@ namespace UMS_DataAccess.Models
         [StringLength(25)]
         public string Password { get; set; } = null!;
 
-        public bool IdDeleted { get; set; }
+        public bool IsDeleted { get; set; }
 
     }
 }
