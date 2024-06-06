@@ -29,7 +29,6 @@ export class UserService {
     return this.http.put<void>(`${this.baseUrl}/${user.id}`, user);
   }
 
-
   deleteUser(ids: number[]): Observable<void[]> {
     const deleteRequests = ids.map(id =>
       this.http.delete<void>(`${this.baseUrl}/${id}`)

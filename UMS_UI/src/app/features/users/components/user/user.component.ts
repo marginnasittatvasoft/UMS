@@ -23,6 +23,7 @@ import {
   MatDialogTitle,
   MatDialogContent,
 } from '@angular/material/dialog';
+import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal.component';
 
 @Component({
   selector: 'app-user',
@@ -44,14 +45,10 @@ export class UserComponent implements OnInit, AfterViewInit {
   selectedUserIds: number[] = [];
   isHeaderSelected: boolean = false;
 
-
-
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  constructor(private userService: UserService, public dialog: MatDialog) {
-
-  }
+  constructor(private userService: UserService, public dialog: MatDialog) {}
 
   ngOnInit() {
     this.dataSource = new MatTableDataSource([]);
@@ -95,7 +92,6 @@ export class UserComponent implements OnInit, AfterViewInit {
     return this.selectedSortColumns.includes(column);
   }
 
-
   applySorting(selectedColumns: string[]) {
     this.selectedSortColumns = selectedColumns;
 
@@ -122,14 +118,20 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   deleteUser(id: number[]) {
-    this.userService.deleteUser(id).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('There was an error!', error);
-      },
+    const dialogRef = this.dialog.open(UserDeleteModalComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userService.deleteUser(id).subscribe({
+          next: () => {
+            this.loadUsers();
+          },
+          error: (error) => {
+            console.error('There was an error!', error);
+          },
+        });
+      }
     });
+
   }
 
   isCheckboxSelected(userId: number): boolean {
@@ -160,11 +162,22 @@ export class UserComponent implements OnInit, AfterViewInit {
     return this.selectedUserIds.length === this.user.length;
   }
 
-  deleteSelectedUsers() {
+  deleteSelectedUsers(): void {
     if (this.selectedUserIds.length === 0) {
       return;
     }
-    console.log(this.selectedUserIds)
+    const dialogRef = this.dialog.open(UserDeleteModalComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.performDeletion();
+      }
+      else {
+        this.toggleSelectAll(false);
+      }
+    });
+  }
+
+  performDeletion(): void {
     this.userService.deleteUser(this.selectedUserIds).subscribe({
       next: () => {
         this.loadUsers();
