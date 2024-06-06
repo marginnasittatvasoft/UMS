@@ -18,10 +18,24 @@
             </mat-select>
         </mat-form-field>
 
-        <mat-form-field>
+        <mat-form-field class="me-3">
             <input matInput (keyup)="applyFilter($event)" placeholder="Search">
         </mat-form-field>
 
+        <mat-form-field class="mb-0">
+            <input matInput type="number" placeholder="Page Size"
+                #pageSizeInput
+                (change)="changePageSize(pageSizeInput.value)">
+        </mat-form-field>
+
+    </div>
+    <div class="pb-2 d-flex justify-content-end">
+        <div class="me-3">
+            <a mat-raised-button color="primary" routerLink="/Ums/adduser">Add
+                User</a>
+        </div>
+        <button mat-raised-button color="warn"
+            (click)="deleteSelectedUsers()">Delete Selected</button>
     </div>
 
     <div class="my-3">
@@ -76,22 +90,7 @@
 
             <mat-paginator [pageSizeOptions]="pageSizeOptions"
                 [pageSize]="pageSize"></mat-paginator>
-            <div class="mt-2 me-2 d-flex justify-content-between">
-                <div class="p-2">
-                    <button mat-raised-button color="warn"
-                        (click)="deleteSelectedUsers()">Delete Selected</button>
-                </div>
 
-                <mat-form-field>
-                    <input matInput type="number" placeholder="Page Size"
-                        #pageSizeInput
-                        (change)="changePageSize(pageSizeInput.value)">
-                </mat-form-field>
-            </div>
         </div>`
-    </div>
-
-    <div class="d-flex justify-content-end">
-        <a mat-raised-button routerLink="/Ums/adduser">Add User</a>
     </div>
 </div>
