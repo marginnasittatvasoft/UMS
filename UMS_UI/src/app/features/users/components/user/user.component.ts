@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatCheckbox, MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
 
 import { RouterLink } from '@angular/router';
@@ -26,7 +27,7 @@ import {
 @Component({
   selector: 'app-user',
   standalone: true,
-  imports: [MatPaginatorModule, MatPaginator, CommonModule, MatTableModule, MatInputModule, MatSelectModule, MatButtonModule, MatRadioModule, MatIconModule, RouterLink, MatSortModule, AddEditUserComponent, MatSort],
+  imports: [MatPaginatorModule, MatPaginator, CommonModule, MatTableModule, MatInputModule, MatCheckbox, MatSelectModule, MatButtonModule, MatRadioModule, MatIconModule, RouterLink, MatSortModule, AddEditUserComponent, MatSort, MatCheckboxModule],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
 })
@@ -40,6 +41,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   pageSize: number = 5;
   selectedSortColumns: string[] = ['userName'];
   defaultSortOrder: SortDirection = 'desc';
+
 
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -112,8 +114,6 @@ export class UserComponent implements OnInit, AfterViewInit {
 
     this.dataSource.sort = this.sort;
   }
-
-
 
   EditUserForm(user: User) {
     console.log(user);

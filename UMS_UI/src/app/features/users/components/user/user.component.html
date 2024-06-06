@@ -30,8 +30,8 @@
                 matSortDisableClear="true"
                 matSortActive={{selectedSortColumns}}
                 [matSortDirection]="defaultSortOrder">
-                @for (column of displayedColumns; track column) {
-                <ng-container
+
+                <ng-container *ngFor="let column of displayedColumns"
                     [matColumnDef]="column">
                     <th mat-header-cell *matHeaderCellDef
                         [mat-sort-header]="isSortEnabled(column) ? column : null"
@@ -56,7 +56,15 @@
                         }
                     </td>
                 </ng-container>
-                }
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox></mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let user">
+                        <mat-checkbox>
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
 
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row
