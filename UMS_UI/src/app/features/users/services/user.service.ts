@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { User } from '../models/user.model';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 import { API_BASE_URL } from '../../../shared/endpoints/endpoints.const';
 
 @Injectable({
@@ -29,7 +29,11 @@ export class UserService {
     return this.http.put<void>(`${this.baseUrl}/${user.id}`, user);
   }
 
-  deleteUser(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+
+  deleteUser(ids: number[]): Observable<void[]> {
+    const deleteRequests = ids.map(id =>
+      this.http.delete<void>(`${this.baseUrl}/${id}`)
+    );
+    return forkJoin(deleteRequests);
   }
 }

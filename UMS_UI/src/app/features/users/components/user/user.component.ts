@@ -35,12 +35,14 @@ import {
 export class UserComponent implements OnInit, AfterViewInit {
   user: User[] = [];
   displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
-
+  addSelectColumn: string[];
   dataSource: MatTableDataSource<User>;
   pageSizeOptions: number[] = [5, 10, 20];
   pageSize: number = 5;
   selectedSortColumns: string[] = ['userName'];
   defaultSortOrder: SortDirection = 'desc';
+  selectedUserIds: number[] = [];
+  isHeaderSelected: boolean = false;
 
 
 
@@ -48,10 +50,13 @@ export class UserComponent implements OnInit, AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
 
   constructor(private userService: UserService, public dialog: MatDialog) {
-    this.dataSource = new MatTableDataSource([]);
+
   }
 
   ngOnInit() {
+    this.dataSource = new MatTableDataSource([]);
+    this.addSelectColumn = [...this.displayedColumns];
+    this.addSelectColumn.unshift('select')
     this.loadUsers();
   }
 
@@ -65,17 +70,6 @@ export class UserComponent implements OnInit, AfterViewInit {
       this.dataSource.data = data;
       this.user = data;
       this.applySorting(['userName']);
-    });
-  }
-
-  deleteUser(id: number) {
-    this.userService.deleteUser(id).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (error) => {
-        console.error('There was an error!', error);
-      },
     });
   }
 
@@ -125,5 +119,61 @@ export class UserComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       this.loadUsers();
     });
+  }
+
+  deleteUser(id: number[]) {
+    this.userService.deleteUser(id).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('There was an error!', error);
+      },
+    });
+  }
+
+  isCheckboxSelected(userId: number): boolean {
+    return this.selectedUserIds.includes(userId);
+  }
+
+  toggleSelectAll(event: any) {
+    this.isHeaderSelected = event.checked;
+    if (this.isHeaderSelected) {
+      this.selectedUserIds = this.user.map(user => user.id);
+    } else {
+      this.selectedUserIds = [];
+    }
+  }
+
+  toggleSelection(event: MatCheckboxChange, userId: number) {
+    if (event.checked) {
+      this.selectedUserIds.push(userId);
+    } else {
+      const index = this.selectedUserIds.indexOf(userId);
+      if (index !== -1) {
+        this.selectedUserIds.splice(index, 1);
+      }
+    }
+  }
+
+  isAllCellsSelected(): boolean {
+    return this.selectedUserIds.length === this.user.length;
+  }
+
+  deleteSelectedUsers() {
+    if (this.selectedUserIds.length === 0) {
+      return;
+    }
+    console.log(this.selectedUserIds)
+    this.userService.deleteUser(this.selectedUserIds).subscribe({
+      next: () => {
+        this.loadUsers();
+        this.selectedUserIds = [];
+      },
+      error: (error) => {
+        console.error('There was an error deleting users!', error);
+      }
+    });
+    this.isHeaderSelected = false;
   }
 }
