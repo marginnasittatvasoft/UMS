@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -33,13 +33,13 @@ import {
 
 export class UserComponent implements OnInit, AfterViewInit {
   user: User[] = [];
-  displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'password', 'action'];
-  allColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'password', 'action'];
+  displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
+
   dataSource: MatTableDataSource<User>;
   pageSizeOptions: number[] = [5, 10, 20];
   pageSize: number = 5;
-  selectedSortColumns: string[] = [];
-  defaultSortOrder: 'asc' | 'desc' = 'asc';
+  selectedSortColumns: string[] = ['userName'];
+  defaultSortOrder: SortDirection = 'desc';
 
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -62,7 +62,7 @@ export class UserComponent implements OnInit, AfterViewInit {
     this.userService.getUsers().subscribe((data) => {
       this.dataSource.data = data;
       this.user = data;
-      this.applySorting(); // Ensure sorting is applied when data is loaded
+      this.applySorting(['userName']);
     });
   }
 
@@ -99,17 +99,9 @@ export class UserComponent implements OnInit, AfterViewInit {
     return this.selectedSortColumns.includes(column);
   }
 
-  // applySorting() {
-  //   this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
-  //     if (!this.isSortEnabled(sortHeaderId) || sortHeaderId === 'action') {
-  //       return '';
-  //     }
-  //     return data[sortHeaderId];
-  //   };
-  //   this.dataSource.sort = this.sort;
-  // }
-  applySorting() {
-    const defaultSortDirection: SortDirection = this.defaultSortOrder === 'asc' ? 'asc' : 'desc';
+
+  applySorting(selectedColumns: string[]) {
+    this.selectedSortColumns = selectedColumns;
 
     this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
       if (!this.isSortEnabled(sortHeaderId) || sortHeaderId === 'action') {
@@ -118,10 +110,9 @@ export class UserComponent implements OnInit, AfterViewInit {
       return data[sortHeaderId];
     };
 
-    this.dataSource.sort.direction = defaultSortDirection;
-    this.dataSource.sort.active = this.selectedSortColumns[0];
     this.dataSource.sort = this.sort;
   }
+
 
 
   EditUserForm(user: User) {

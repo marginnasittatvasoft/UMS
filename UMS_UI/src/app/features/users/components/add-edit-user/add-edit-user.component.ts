@@ -1,3 +1,4 @@
+
 import { Component, EventEmitter, Inject, Input, OnChanges, Optional, Output, SimpleChanges, input } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
+import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 
 
 @Component({
@@ -24,7 +26,7 @@ export class AddEditUserComponent {
   isDialogMode: boolean = false;
 
 
-  constructor(private fb: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any) {
+  constructor(private fb: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService) {
   }
 
   ngOnInit(): void {
@@ -38,23 +40,22 @@ export class AddEditUserComponent {
 
   createForm() {
     this.addUserForm = this.fb.group({
-      id: [''],
-      firstName: ['', [Validators.required, Validators.maxLength(20)]],
-      lastName: ['', [Validators.required, Validators.maxLength(20)]],
+      id: ['', []],
+      firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
-      street: ['', [Validators.required, Validators.maxLength(150)]],
-      city: [''],
-      state: [''],
-      userName: ['', [Validators.required, Validators.maxLength(20)]],
-      password: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(6)]],
+      phone: ['', [Validators.required, Validators.pattern("[0-9 ]{10}")]],
+      street: ['', [Validators.required, Validators.maxLength(150), Validators.minLength(2)]],
+      city: ['', []],
+      state: ['', []],
+      userName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
+      password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+\-]).{6,16}$/)]],
     });
   }
 
 
   onSubmit() {
     console.log(this.addUserForm.value);
-    debugger;
     if (this.addUserForm.valid) {
       if (this.isDialogMode) {
         this.submitDialogForm();
