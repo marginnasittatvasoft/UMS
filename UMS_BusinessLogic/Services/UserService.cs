@@ -16,14 +16,14 @@ namespace UMS_BusinessLogic.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        private readonly IUserRepositories _userService;
+        private readonly IUserRepositories _userRepositories;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(ApplicationDbContext context, IMapper mapper, IUserRepositories userService,ILogger<UserService> logger)
+        public UserService(ApplicationDbContext context, IMapper mapper, IUserRepositories userRepositories,ILogger<UserService> logger)
         {
             _context = context;
             _mapper = mapper;
-            _userService = userService;
+            _userRepositories = userRepositories;
             _logger=logger;
         }
 
@@ -31,7 +31,7 @@ namespace UMS_BusinessLogic.Services
         {
             try
             {
-                return await _userService.GetUserById(id);
+                return await _userRepositories.GetUserById(id);
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace UMS_BusinessLogic.Services
         {
             try
             {
-                return await _userService.GetAllUsers();
+                return await _userRepositories.GetAllUsers();
             }
             catch (Exception ex)
             {
@@ -57,7 +57,7 @@ namespace UMS_BusinessLogic.Services
         {
             try
             {
-                return await _userService.AddUser(user); 
+                return await _userRepositories.AddUser(user); 
             }
             catch (Exception ex)
             {
@@ -71,13 +71,13 @@ namespace UMS_BusinessLogic.Services
         {
             try
             {
-                var existingUser = await _userService.GetUserById(id);
+                var existingUser = await _userRepositories.GetUserById(id);
                 if (existingUser == null)
                     return null;
 
                 _mapper.Map(user, existingUser);
 
-                return await _userService.UpdateUser(existingUser);
+                return await _userRepositories.UpdateUser(existingUser);
             }
             catch (Exception ex)
             {
@@ -90,7 +90,7 @@ namespace UMS_BusinessLogic.Services
         {
             try
             {
-                return await _userService.DeleteUser(id);
+                return await _userRepositories.DeleteUser(id);
             }
             catch (Exception ex)
             {
@@ -99,6 +99,21 @@ namespace UMS_BusinessLogic.Services
             }
         }
 
-        
+
+        public async Task<bool> Authenticate(string username, string password)
+        {
+            try
+            {
+                return _userRepositories.AuthenticateUser(username, password);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw ex;
+            }
+        }
+
+
+
     }
 }

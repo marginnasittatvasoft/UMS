@@ -6,6 +6,7 @@ using UMS_DataAccess.Dto;
 using UMS_DataAccess.Models;
 using Microsoft.Extensions.Logging;
 using UMS_BusinessLogic.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace UMS_API.Controllers
 {
@@ -18,15 +19,15 @@ namespace UMS_API.Controllers
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(IMapper mapper, IUserService userRepositorie, ILogger<UserController> logger)
+        public UserController(IMapper mapper, IUserService userService, ILogger<UserController> logger)
         {
             _mapper = mapper;
-            _userService = userRepositorie;
+            _userService = userService;
             _logger = logger;
         }
 
 
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
@@ -34,6 +35,7 @@ namespace UMS_API.Controllers
             return Ok(user);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUsersById(int id)
         {
@@ -41,7 +43,6 @@ namespace UMS_API.Controllers
             return Ok(user);
 
         }
-
 
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserDto userDto)

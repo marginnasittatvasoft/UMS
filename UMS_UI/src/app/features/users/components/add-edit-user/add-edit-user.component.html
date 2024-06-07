@@ -1,7 +1,7 @@
 <div class="container mt-3" *ngIf="!isDialogMode">
     <div class="d-flex justify-content-between mb-5">
         <h1>Add User</h1>
-        <a mat-raised-button routerLink="/Ums/home">
+        <a mat-raised-button routerLink="/Ums/user">
             <mat-icon>arrow_back</mat-icon> Back
         </a>
     </div>
@@ -24,7 +24,7 @@
     <mat-dialog-actions class="d-flex justify-content-end mb-2">
         <button mat-raised-button color="warn"
             mat-dialog-close>Cancel</button>
-        <button mat-raised-button color="accent" type="submit"
+        <button mat-raised-button color="primary" type="submit"
             [disabled]="addUserForm.invalid" (click)="onSubmit()"
             mat-dialog-close>Save</button>
     </mat-dialog-actions>

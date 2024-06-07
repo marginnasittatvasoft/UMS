@@ -100,5 +100,30 @@ namespace UMS_BusinessLogic.Repositories
                 throw ex;
             }
         }
+
+
+        public bool AuthenticateUser(string username, string password)
+        {
+            try
+            {
+                if(username != null)
+                {
+                    User? user = _context.Users.FirstOrDefault(i => i.UserName == username);
+                    if(user != null)
+                    {
+                        return _context.Users.Any(i => i.UserName == username && i.Password == password);
+                    }
+                    return false;
+
+                }
+                return false;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError("Getting error with Authenticate" + ex.ToString());
+                throw ex;
+            }
+
+        }
     }
 }

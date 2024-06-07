@@ -1,0 +1,11 @@
+<mat-toolbar color="primary">
+    <span>User Management</span>
+    <div class="spacer"></div>
+
+    <ng-container *ngFor="let link of getNavigationLinks()">
+        <a class="me-3" mat-button
+            [routerLink]="link.route">{{ link.label }}</a>
+    </ng-container>
+    <a class="me-3" mat-button *ngIf="isLoggedIn"
+        (click)="logout()">Logout</a>
+</mat-toolbar>

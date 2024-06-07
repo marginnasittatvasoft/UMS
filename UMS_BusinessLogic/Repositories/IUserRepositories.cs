@@ -18,5 +18,7 @@ namespace UMS_BusinessLogic.Repositories
         Task<User> UpdateUser(User user);
 
         Task<bool> DeleteUser(int id);
+
+        bool AuthenticateUser(string username, string password);
     }
 }

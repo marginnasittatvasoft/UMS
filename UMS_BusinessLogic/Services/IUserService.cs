@@ -9,5 +9,7 @@ namespace UMS_BusinessLogic.Services
         Task<User> AddUser(User user);
         Task<User> UpdateUser(int id, User user);
         Task<bool> DeleteUser(int id);
+
+        Task<bool> Authenticate(string username, string password);
     }
 }

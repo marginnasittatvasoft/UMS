@@ -1,9 +1,12 @@
 using AutoMapper;
 using EMS.API.Profiles;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
 using System.IO;
+using System.Text;
 using UMS_API.Extensions;
 using UMS_BusinessLogic.Repositories;
 using UMS_BusinessLogic.Services;
@@ -22,6 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepositories, UserRepositories>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Error() 
@@ -37,6 +41,31 @@ string GetLogFilePath()
     string logFileName = DateTime.Now.ToString("dd") + "logfile" + ".txt";
     return Path.Combine(logFolder, logFileName);
 }
+
+
+var secret = builder.Configuration["Jwt:Key"];
+var key = Encoding.ASCII.GetBytes(secret)
+
+;
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    x.SaveToken = true;
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+
+,
+        ValidateIssuer = false,
+        ValidateAudience = false
+    };
+});
 
 builder.Host.UseSerilog();
 
@@ -64,6 +93,8 @@ app.UseCors(options =>
 app.UseAuthorization();
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

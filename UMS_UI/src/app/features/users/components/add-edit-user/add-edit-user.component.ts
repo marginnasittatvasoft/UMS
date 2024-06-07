@@ -26,7 +26,7 @@ export class AddEditUserComponent {
   isDialogMode: boolean = false;
 
 
-  constructor(private fb: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService) {
+  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService) {
   }
 
   ngOnInit(): void {
@@ -39,7 +39,7 @@ export class AddEditUserComponent {
   }
 
   createForm() {
-    this.addUserForm = this.fb.group({
+    this.addUserForm = this.formbuilder.group({
       id: ['', []],
       firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
