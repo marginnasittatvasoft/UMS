@@ -21,6 +21,12 @@ export class TestingComponent implements OnInit {
         showFirstLastButton: true,
         hidePageSizeOption: false,
         disabledPagination: false
+      },
+      sorting: {
+        disabledSorting: false,
+        matSortActiveColumn: 'name',
+        SortDisableClear: true,
+        defaultSortingOrder: 'desc'
       }
 
     }

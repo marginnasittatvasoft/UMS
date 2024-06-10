@@ -4997,6 +4997,7 @@ export {
   MatCommonModule,
   _ErrorStateTracker,
   ErrorStateMatcher,
+  MatRipple,
   MatRippleModule,
   MAT_OPTION_PARENT_COMPONENT,
   MAT_OPTGROUP,
@@ -5004,6 +5005,7 @@ export {
   _countGroupLabelsBeforeOption,
   _getOptionScrollPosition,
   MatOptionModule,
-  MatRippleLoader
+  MatRippleLoader,
+  _MatInternalFormField
 };
-//# sourceMappingURL=chunk-AAYZB5LW.js.map
+//# sourceMappingURL=chunk-Y7MYXGK4.js.map

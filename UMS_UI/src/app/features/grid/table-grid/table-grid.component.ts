@@ -4,18 +4,21 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { TableDataGrid } from './models/table-grid.config';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-table-grid',
   standalone: true,
-  imports: [MatTableModule, MatPaginatorModule, MatSortModule],
+  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatCheckboxModule],
   templateUrl: './table-grid.component.html',
   styleUrl: './table-grid.component.css'
 })
 export class TableGridComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
+  displayedColumns: string[] = ['select', 'position', 'name', 'weight', 'symbol'];
   dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+  selection = new SelectionModel<PeriodicElement>(true, []);
 
   @Input() config: TableDataGrid;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -27,6 +30,30 @@ export class TableGridComponent implements AfterViewInit {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  toggleAllRows() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+
+    this.selection.select(...this.dataSource.data);
+  }
+
+  checkboxLabel(row?: PeriodicElement): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+  }
+
+
   get pageSize() {
     return this.config.pagination.defaultPageSize ?? 5
   }
@@ -47,6 +74,22 @@ export class TableGridComponent implements AfterViewInit {
     return this.config.pagination.disabledPagination ?? false
   }
 
+
+  get disabledSorting() {
+    return this.config.sorting.disabledSorting ?? false
+  }
+
+  get sortActiveColumn() {
+    return this.config.sorting.matSortActiveColumn ?? 'position'
+  }
+
+  get sortDisabledClear() {
+    return this.config.sorting.SortDisableClear ?? true
+  }
+
+  get sortDirection() {
+    return this.config.sorting.defaultSortingOrder ?? 'asc'
+  }
 }
 
 export interface PeriodicElement {
