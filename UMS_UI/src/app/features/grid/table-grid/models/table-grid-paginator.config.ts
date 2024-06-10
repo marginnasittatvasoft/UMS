@@ -1,6 +1,6 @@
 export interface TableGridPaginatorConfig {
     defaultPageSize?: number;
-    PageSizeOption?: number[];
+    pageSizeOption?: number[];
     showFirstLastButton?: boolean;
     hidePageSizeOption?: boolean;
     disabledPagination?: boolean;

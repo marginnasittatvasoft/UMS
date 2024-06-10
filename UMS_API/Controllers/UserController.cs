@@ -44,6 +44,7 @@ namespace UMS_API.Controllers
 
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserDto userDto)
         {
@@ -60,7 +61,7 @@ namespace UMS_API.Controllers
             return NotFound();
         }
 
-
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
         {
@@ -79,6 +80,7 @@ namespace UMS_API.Controllers
             return Ok(response);
         }
 
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

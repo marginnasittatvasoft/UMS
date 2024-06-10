@@ -12,7 +12,9 @@ export const SecureRoutes: Routes = [
         loadComponent: () => import('../../public-layout/component/login-page/login-page.component').then(m => m.LoginPageComponent)
     },
     {
-        path: 'Ums', children: [
+        path: 'Ums',
+        canActivate: [authGuard],
+        children: [
             {
                 path: 'user',
                 loadComponent: () => import('../../../users/components/user/user.component').then(m => m.UserComponent)
@@ -21,7 +23,7 @@ export const SecureRoutes: Routes = [
                 path: 'adduser',
                 loadComponent: () => import('../../../users/components/add-edit-user/add-edit-user.component').then(m => m.AddEditUserComponent)
             }
-        ], canActivate: [authGuard]
+        ]
     },
 
     {

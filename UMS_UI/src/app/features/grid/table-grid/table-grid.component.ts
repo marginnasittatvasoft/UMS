@@ -1,123 +1,277 @@
 
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
+import { MatSort, Sort, MatSortModule, SortDirection } from '@angular/material/sort';
 import { TableDataGrid } from './models/table-grid.config';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { User } from '../../users/models/user.model';
+import { UserService } from '../../users/services/user.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { UserDeleteModalComponent } from '../../users/components/user-delete-modal/user-delete-modal.component';
+import { RouterLink } from '@angular/router';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-table-grid',
   standalone: true,
-  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatCheckboxModule],
+  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatCheckboxModule, MatIconModule, CommonModule, MatButtonModule, RouterLink, MatInputModule, MatSelectModule],
   templateUrl: './table-grid.component.html',
   styleUrl: './table-grid.component.css'
 })
-export class TableGridComponent implements AfterViewInit {
 
-  displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
-  dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
-  selection = new SelectionModel<PeriodicElement>(true, []);
+export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
+  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar) { }
 
   @Input() config: TableDataGrid;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
+  user: User[] = [];
+  displayedColumns: string[] = [];
+  dataSource: MatTableDataSource<User>;
+  addAnotherColumn: string[];
+  selectedSortColumns: string[] = [];
+  filterDataColumn: string[] = [];
+  sortingOrder: SortDirection;
+  selectedUserIds: number[] = [];
+  isHeaderSelected: boolean = false;
+  defalutPageSize: number;
+
+
+  ngOnInit() {
+    this.initializeTable();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['config']) {
+      this.initializeTable();
+    }
+  }
 
   ngAfterViewInit() {
-    console.log(this.paginator)
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
+  initializeTable() {
+    if (this.config) {
+      this.displayedColumns = this.config.tableData.displayedColumn;
+      this.filterDataColumn = this.config.tableData.filterDataColumn;
+      this.dataSource = new MatTableDataSource(this.config.tableData.userData);
+      this.addAnotherColumn = [...this.displayedColumns];
+      this.addAnotherColumn.unshift('select');
+      if (this.config.tableData.showActionColumn) {
+        this.addAnotherColumn.push('action');
+      }
+      this.user = this.config.tableData.userData;
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+      this.selectedSortColumns = [this.config.sorting.matSortActiveColumn];
+    }
   }
 
-  toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
+  isSortEnabled(column: string): boolean {
+    return this.selectedSortColumns.includes(column);
+  }
+
+  editUser(user: User) {
+    if (this.config && this.config.actionButtons) {
+      const editButton = this.config.actionButtons.find(i => i.icon === 'edit');
+      if (editButton && editButton.callBack) {
+        editButton.callBack(user);
+      }
+      else {
+        this.snackBar.open('Something is wrong!!!', 'OK');
+      }
+    }
+    else {
+      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
+    }
+  }
+
+
+
+  deleteUser(id: number[]) {
+    if (this.config && this.config.actionButtons) {
+      const deleteButton = this.config.actionButtons.find(i => i.icon === 'delete');
+      if (deleteButton && deleteButton.callBack) {
+        deleteButton.callBack(id);
+      }
+      else {
+        this.snackBar.open('Something is wrong!!!', 'OK');
+      }
+    }
+    else {
+      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
+    }
+  }
+
+
+  isCheckboxSelected(userId: number): boolean {
+    return this.selectedUserIds.includes(userId);
+  }
+
+  toggleSelectAll(event: any) {
+    this.isHeaderSelected = event.checked;
+    if (this.isHeaderSelected) {
+      this.selectedUserIds = this.user.map(user => user.id);
+    } else {
+      this.selectedUserIds = [];
+    }
+  }
+
+  toggleSelection(event: MatCheckboxChange, userId: number) {
+    if (event.checked) {
+      this.selectedUserIds.push(userId);
+    } else {
+      const index = this.selectedUserIds.indexOf(userId);
+      if (index !== -1) {
+        this.selectedUserIds.splice(index, 1);
+      }
+    }
+  }
+
+  isAllCellsSelected(): boolean {
+    return this.selectedUserIds.length === this.user.length;
+  }
+
+  deleteSelectedUsers(): void {
+    if (this.selectedUserIds.length === 0) {
       return;
     }
-
-    this.selection.select(...this.dataSource.data);
-  }
-
-  checkboxLabel(row?: PeriodicElement): string {
-    if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    if (this.config && this.config.tableFeatures) {
+      const deleteSelectedButton = this.config.tableFeatures.find(i => i.selectField === 'deleteselectedbtn');
+      if (deleteSelectedButton && deleteSelectedButton.callBack) {
+        deleteSelectedButton.callBack(this.selectedUserIds);
+        this.isHeaderSelected = false;
+      } else {
+        this.toggleSelectAll(false);
+      }
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+    else {
+      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
+    }
   }
 
+  applySorting(selectedColumns: string[]) {
+    this.selectedSortColumns = selectedColumns;
+
+    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
+      if (!this.isSortEnabled(sortHeaderId)) {
+        return '';
+      }
+      return data[sortHeaderId];
+    };
+
+    this.dataSource.sort = this.sort;
+  }
+
+  changeSortingOrder(sortdirection: SortDirection) {
+    this.sortingOrder = sortdirection;
+    if (this.config && this.config.tableFeatures) {
+      const loadUserFeature = this.config.tableFeatures.find(i => i.selectField === 'loaduser');
+      if (loadUserFeature && loadUserFeature.callBack) {
+        loadUserFeature.callBack(null);
+      } else {
+        this.snackBar.open('Something is wrong!!!', 'OK');
+      }
+    }
+    else {
+      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
+    }
+  }
+
+
+
+  changePageSize(pageSizeValue: string) {
+    const pageSize = parseInt(pageSizeValue, 10)
+    if (!Number.isNaN(pageSize)) {
+      this.defalutPageSize = pageSize;
+      this.paginator.pageSize = pageSize;
+    }
+    else {
+      this.defalutPageSize = this.config.pagination?.defaultPageSize;
+      this.paginator.pageSize = this.config.pagination?.defaultPageSize;
+    }
+
+    if (this.config.tableFeatures.find(i => i.selectField === 'loaduser').callBack) {
+      this.config.tableFeatures.find(i => i.selectField === 'loaduser').callBack(null);
+    }
+    else {
+      this.snackBar.open('Something is wrong!!!', 'OK');
+    }
+
+  }
+
+
+  applyFilter(event: Event, columns: string[]) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+    this.dataSource.filterPredicate = (data: User, filter: string) => {
+      return columns.some(column => {
+        return data[column].toLowerCase().includes(filter);
+      });
+    };
+  }
+
+
+  get showFilterOption() {
+    return this.config.tableData?.showFilterOption ?? true;
+  }
+
+  get showSortOrderOption() {
+    return this.config.tableData?.showSortOrderOption ?? true;
+  }
+
+  get showSortingByColumnOption() {
+    return this.config.tableData?.showSortingByColumnOption ?? true;
+  }
+
+  get showPageSizeOptionField() {
+    return this.config.tableData?.showPageSizeOption ?? true;
+  }
 
   get pageSize() {
-    return this.config.pagination.defaultPageSize ?? 5
+    return this.defalutPageSize ?? this.config.pagination?.defaultPageSize ?? 5;
   }
 
   get showFirstLastButtons() {
-    return this.config.pagination.showFirstLastButton ?? true
+    return this.config.pagination?.showFirstLastButton ?? true;
   }
 
   get pageSizeOptions() {
-    return this.config.pagination.PageSizeOption ?? [5, 10, 15]
+    return this.config.pagination?.pageSizeOption ?? [5, 10, 15];
   }
 
-  get showPageSizeOption() {
-    return this.config.pagination.hidePageSizeOption ?? false
+  get hidePageSizeOption() {
+    return this.config.pagination?.hidePageSizeOption ?? false;
   }
 
   get disabledPagination() {
-    return this.config.pagination.disabledPagination ?? false
+    return this.config.pagination?.disabledPagination ?? false;
   }
 
-
   get disabledSorting() {
-    return this.config.sorting.disabledSorting ?? false
+    return this.config.sorting?.disabledSorting ?? false;
   }
 
   get sortActiveColumn() {
-    return this.config.sorting.matSortActiveColumn ?? 'position'
+    return this.config.sorting?.matSortActiveColumn ?? 'userName';
   }
 
   get sortDisabledClear() {
-    return this.config.sorting.SortDisableClear ?? true
+    return this.config.sorting?.sortDisableClear ?? true;
   }
 
   get sortDirection() {
-    return this.config.sorting.defaultSortingOrder ?? 'asc'
+    return this.sortingOrder ?? this.config.sorting?.defaultSortingOrder ?? 'asc';
   }
 }
 
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-  { position: 11, name: 'Sodium', weight: 22.9897, symbol: 'Na' },
-  { position: 12, name: 'Magnesium', weight: 24.305, symbol: 'Mg' },
-  { position: 13, name: 'Aluminum', weight: 26.9815, symbol: 'Al' },
-  { position: 14, name: 'Silicon', weight: 28.0855, symbol: 'Si' },
-  { position: 15, name: 'Phosphorus', weight: 30.9738, symbol: 'P' },
-  { position: 16, name: 'Sulfur', weight: 32.065, symbol: 'S' },
-  { position: 17, name: 'Chlorine', weight: 35.453, symbol: 'Cl' },
-  { position: 18, name: 'Argon', weight: 39.948, symbol: 'Ar' },
-  { position: 19, name: 'Potassium', weight: 39.0983, symbol: 'K' },
-  { position: 20, name: 'Calcium', weight: 40.078, symbol: 'Ca' },
-];

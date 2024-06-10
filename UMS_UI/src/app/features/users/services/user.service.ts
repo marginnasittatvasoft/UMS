@@ -25,7 +25,6 @@ export class UserService {
   }
 
   updateUser(user: User): Observable<void> {
-    console.log(user);
     return this.http.put<void>(this.baseUrl + endPoint.Users + user.id, user);
   }
 

@@ -1,10 +1,11 @@
 `
-    <h2 mat-dialog-title>Confirm Action</h2>
-    <mat-dialog-content>
-      Are you sure you want to delete the selected users?
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancelDelete()">Cancel</button>
-      <button mat-button color="warn" [mat-dialog-close]="true">Delete</button>
-    </mat-dialog-actions>
-  `,
+<h2 mat-dialog-title>Confirm</h2>
+<mat-dialog-content>
+  Are you sure you want to delete the selected users?
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="me-3">
+  <button mat-button (click)="onCancelDelete()">Cancel</button>
+  <button mat-raised-button color="warn"
+    [mat-dialog-close]="true">Delete</button>
+</mat-dialog-actions>
+`,

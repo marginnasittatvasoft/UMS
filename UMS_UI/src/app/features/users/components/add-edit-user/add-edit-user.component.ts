@@ -2,7 +2,7 @@
 import { Component, EventEmitter, Inject, Input, OnChanges, Optional, Output, SimpleChanges, input } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class AddEditUserComponent {
   isDialogMode: boolean = false;
 
 
-  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService) {
+  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router, private snackBar: MatSnackBar) {
   }
 
   ngOnInit(): void {
@@ -55,7 +56,6 @@ export class AddEditUserComponent {
 
 
   onSubmit() {
-    console.log(this.addUserForm.value);
     if (this.addUserForm.valid) {
       if (this.isDialogMode) {
         this.submitDialogForm();
@@ -69,9 +69,11 @@ export class AddEditUserComponent {
     this.userService.addUser(this.addUserForm.value).subscribe({
       next: () => {
         this.resetForm();
+        this.snackBar.open('Data Added Successfully!!!', 'OK', { duration: 1000 });
+        this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
-        console.error('There was an error!', error);
+        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
       },
     });
   }
@@ -79,10 +81,10 @@ export class AddEditUserComponent {
   submitDialogForm() {
     this.userService.updateUser(this.addUserForm.value).subscribe({
       next: () => {
-
+        this.snackBar.open('Data Added Successfully!!!', 'OK', { duration: 1000 });
       },
       error: (error) => {
-        console.error('There was an error!', error);
+        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
       },
     });
   }

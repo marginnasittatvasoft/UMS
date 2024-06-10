@@ -10,103 +10,101 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckbox, MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
-
 import { RouterLink } from '@angular/router';
 import { MatSort, Sort, MatSortModule, SortDirection } from '@angular/material/sort';
-
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { AddEditUserComponent } from '../add-edit-user/add-edit-user.component';
-import {
-  MatDialog,
-  MAT_DIALOG_DATA,
-  MatDialogTitle,
-  MatDialogContent,
-} from '@angular/material/dialog';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
 import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal.component';
+import { TableGridComponent } from '../../../grid/table-grid/table-grid.component';
+import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config';
+
 
 @Component({
   selector: 'app-user',
   standalone: true,
-  imports: [MatPaginatorModule, MatPaginator, CommonModule, MatTableModule, MatInputModule, MatCheckbox, MatSelectModule, MatButtonModule, MatRadioModule, MatIconModule, RouterLink, MatSortModule, AddEditUserComponent, MatSort, MatCheckboxModule],
+  imports: [MatPaginatorModule, MatPaginator, CommonModule, MatTableModule, MatInputModule, MatCheckbox, MatSelectModule, MatButtonModule, MatRadioModule, MatIconModule, RouterLink, MatSortModule, AddEditUserComponent, MatSort, MatCheckboxModule, TableGridComponent],
   templateUrl: './user.component.html',
   styleUrl: './user.component.css'
 })
 
-export class UserComponent implements OnInit, AfterViewInit {
+export class UserComponent implements OnInit {
+
+  constructor(private userService: UserService, public dialog: MatDialog) { }
+  datagridConfig: TableDataGrid;
   user: User[] = [];
-  displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
-  addSelectColumn: string[];
-  dataSource: MatTableDataSource<User>;
-  pageSizeOptions: number[] = [5, 10, 20];
-  pageSize: number = 5;
-  selectedSortColumns: string[] = ['userName'];
-  defaultSortOrder: SortDirection = 'desc';
-  selectedUserIds: number[] = [];
-  isHeaderSelected: boolean = false;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-
-  constructor(private userService: UserService, public dialog: MatDialog) {}
-
-  ngOnInit() {
-    this.dataSource = new MatTableDataSource([]);
-    this.addSelectColumn = [...this.displayedColumns];
-    this.addSelectColumn.unshift('select')
+  ngOnInit(): void {
     this.loadUsers();
-  }
-
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.loadTable();
   }
 
   loadUsers() {
     this.userService.getUsers().subscribe((data) => {
-      this.dataSource.data = data;
       this.user = data;
-      this.applySorting(['userName']);
+      this.loadTable();
     });
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.filter = filterValue;
-    this.dataSource.filterPredicate = (data: User, filter: string) => {
-      return data.firstName.toLowerCase().includes(filter) ||
-        data.lastName.toLowerCase().includes(filter) ||
-        data.email.toLowerCase().includes(filter) ||
-        data.userName.toLowerCase().includes(filter);
-    };
+  loadTable() {
+    this.datagridConfig = {
+      pagination: {
+        defaultPageSize: 2,
+        pageSizeOption: [10, 15, 20],
+        showFirstLastButton: true,
+        hidePageSizeOption: false,
+        disabledPagination: false
+      },
+      sorting: {
+        disabledSorting: false,
+        matSortActiveColumn: 'userName',
+        sortDisableClear: true,
+        defaultSortingOrder: 'desc'
+      },
+      tableData: {
+        displayedColumn: ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state'],
+        filterDataColumn: ['userName', 'firstName', 'lastName', 'email'],
+        showActionColumn: true,
+        userData: this.user,
+        showFilterOption: true,
+        showSortOrderOption: true,
+        showSortingByColumnOption: true,
+        showPageSizeOption: true,
+      },
+      actionButtons: [
+        {
+          icon: 'edit',
+          callBack: (data) => {
+            this.EditUserForm(data);
+          }
+        },
+        {
+          icon: 'delete',
+          callBack: (data) => {
+            this.deleteUser(data);
+          }
+        }
+      ],
+      tableFeatures: [
+        {
+          selectField: 'deleteselectedbtn',
+          callBack: (data) => {
+            this.deleteSelectedUsers(data);
+          }
+        },
+        {
+          selectField: 'loaduser',
+          callBack: (data) => {
+            this.loadUsers();
+          }
+        }
+      ]
+    }
   }
 
-  changePageSize(pageSizeValue: string) {
-    const pageSize = parseInt(pageSizeValue, 10);
-    this.pageSize = pageSize;
-    this.paginator.pageSize = pageSize;
-    this.loadUsers();
-  }
-
-  isSortEnabled(column: string): boolean {
-    return this.selectedSortColumns.includes(column);
-  }
-
-  applySorting(selectedColumns: string[]) {
-    this.selectedSortColumns = selectedColumns;
-
-    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
-      if (!this.isSortEnabled(sortHeaderId) || sortHeaderId === 'action') {
-        return '';
-      }
-      return data[sortHeaderId];
-    };
-
-    this.dataSource.sort = this.sort;
-  }
 
   EditUserForm(user: User) {
-    console.log(user);
     const dialogRef = this.dialog.open(AddEditUserComponent, {
       data: {
         user: user ? { ...user } : null
@@ -131,62 +129,180 @@ export class UserComponent implements OnInit, AfterViewInit {
         });
       }
     });
-
   }
 
-  isCheckboxSelected(userId: number): boolean {
-    return this.selectedUserIds.includes(userId);
-  }
-
-  toggleSelectAll(event: any) {
-    this.isHeaderSelected = event.checked;
-    if (this.isHeaderSelected) {
-      this.selectedUserIds = this.user.map(user => user.id);
-    } else {
-      this.selectedUserIds = [];
-    }
-  }
-
-  toggleSelection(event: MatCheckboxChange, userId: number) {
-    if (event.checked) {
-      this.selectedUserIds.push(userId);
-    } else {
-      const index = this.selectedUserIds.indexOf(userId);
-      if (index !== -1) {
-        this.selectedUserIds.splice(index, 1);
-      }
-    }
-  }
-
-  isAllCellsSelected(): boolean {
-    return this.selectedUserIds.length === this.user.length;
-  }
-
-  deleteSelectedUsers(): void {
-    if (this.selectedUserIds.length === 0) {
-      return;
-    }
+  deleteSelectedUsers(selectedUsers: number[]): void {
     const dialogRef = this.dialog.open(UserDeleteModalComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.performDeletion();
-      }
-      else {
-        this.toggleSelectAll(false);
+        this.performDeletion(selectedUsers);
       }
     });
   }
 
-  performDeletion(): void {
-    this.userService.deleteUser(this.selectedUserIds).subscribe({
+  performDeletion(selectedUsers: number[]): void {
+    this.userService.deleteUser(selectedUsers).subscribe({
       next: () => {
         this.loadUsers();
-        this.selectedUserIds = [];
       },
       error: (error) => {
         console.error('There was an error deleting users!', error);
       }
     });
-    this.isHeaderSelected = false;
   }
 }
+
+// displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
+// addSelectColumn: string[];
+// dataSource: MatTableDataSource<User>;
+// pageSizeOptions: number[] = [5, 10, 20];
+// pageSize: number = 5;
+// selectedSortColumns: string[] = ['userName'];
+// defaultSortOrder: SortDirection = 'desc';
+// selectedUserIds: number[] = [];
+// isHeaderSelected: boolean = false;
+
+// @ViewChild(MatPaginator) paginator: MatPaginator;
+// @ViewChild(MatSort) sort: MatSort;
+
+// constructor(private userService: UserService, public dialog: MatDialog) { }
+
+// ngOnInit() {
+//   this.dataSource = new MatTableDataSource([]);
+//   this.addSelectColumn = [...this.displayedColumns];
+//   this.addSelectColumn.unshift('select')
+//   this.loadUsers();
+// }
+
+// ngAfterViewInit(): void {
+//   this.dataSource.paginator = this.paginator;
+//   this.dataSource.sort = this.sort;
+// }
+
+// loadUsers() {
+//   this.userService.getUsers().subscribe((data) => {
+//     this.dataSource.data = data;
+//     this.user = data;
+//     this.applySorting(['userName']);
+//   });
+// }
+
+// applyFilter(event: Event) {
+//   const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+//   this.dataSource.filter = filterValue;
+//   this.dataSource.filterPredicate = (data: User, filter: string) => {
+//     return data.firstName.toLowerCase().includes(filter) ||
+//       data.lastName.toLowerCase().includes(filter) ||
+//       data.email.toLowerCase().includes(filter) ||
+//       data.userName.toLowerCase().includes(filter);
+//   };
+// }
+
+// changePageSize(pageSizeValue: string) {
+//   const pageSize = parseInt(pageSizeValue, 10);
+//   this.pageSize = pageSize;
+//   this.paginator.pageSize = pageSize;
+//   this.loadUsers();
+// }
+
+// isSortEnabled(column: string): boolean {
+//   return this.selectedSortColumns.includes(column);
+// }
+
+// applySorting(selectedColumns: string[]) {
+//   this.selectedSortColumns = selectedColumns;
+
+//   this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
+//     if (!this.isSortEnabled(sortHeaderId) || sortHeaderId === 'action') {
+//       return '';
+//     }
+//     return data[sortHeaderId];
+//   };
+
+//   this.dataSource.sort = this.sort;
+// }
+
+// EditUserForm(user: User) {
+//   console.log(user);
+//   const dialogRef = this.dialog.open(AddEditUserComponent, {
+//     data: {
+//       user: user ? { ...user } : null
+//     }
+//   });
+//   dialogRef.afterClosed().subscribe(result => {
+//     this.loadUsers();
+//   });
+// }
+
+// deleteUser(id: number[]) {
+//   const dialogRef = this.dialog.open(UserDeleteModalComponent);
+//   dialogRef.afterClosed().subscribe(result => {
+//     if (result) {
+//       this.userService.deleteUser(id).subscribe({
+//         next: () => {
+//           this.loadUsers();
+//         },
+//         error: (error) => {
+//           console.error('There was an error!', error);
+//         },
+//       });
+//     }
+//   });
+
+// }
+
+// isCheckboxSelected(userId: number): boolean {
+//   return this.selectedUserIds.includes(userId);
+// }
+
+// toggleSelectAll(event: any) {
+//   this.isHeaderSelected = event.checked;
+//   if (this.isHeaderSelected) {
+//     this.selectedUserIds = this.user.map(user => user.id);
+//   } else {
+//     this.selectedUserIds = [];
+//   }
+// }
+
+// toggleSelection(event: MatCheckboxChange, userId: number) {
+//   if (event.checked) {
+//     this.selectedUserIds.push(userId);
+//   } else {
+//     const index = this.selectedUserIds.indexOf(userId);
+//     if (index !== -1) {
+//       this.selectedUserIds.splice(index, 1);
+//     }
+//   }
+// }
+
+// isAllCellsSelected(): boolean {
+//   return this.selectedUserIds.length === this.user.length;
+// }
+
+// deleteSelectedUsers(): void {
+//   if (this.selectedUserIds.length === 0) {
+//     return;
+//   }
+//   const dialogRef = this.dialog.open(UserDeleteModalComponent);
+//   dialogRef.afterClosed().subscribe(result => {
+//     if (result) {
+//       this.performDeletion();
+//     }
+//     else {
+//       this.toggleSelectAll(false);
+//     }
+//   });
+// }
+
+// performDeletion(): void {
+//   this.userService.deleteUser(this.selectedUserIds).subscribe({
+//     next: () => {
+//       this.loadUsers();
+//       this.selectedUserIds = [];
+//     },
+//     error: (error) => {
+//       console.error('There was an error deleting users!', error);
+//     }
+//   });
+//   this.isHeaderSelected = false;
+// }

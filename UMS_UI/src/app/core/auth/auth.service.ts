@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { API_BASE_URL, endPoint } from '../../shared/endpoints/endpoints.const';
 import { LoginDto } from '../models/user.model';
 import { ApiResponseDTO } from '../models/apiresponse.model';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,22 @@ export class AuthService {
   private readonly baseUrl = API_BASE_URL;
   private isLoggedInSubject: BehaviorSubject<boolean>;
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private router: Router) {
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     this.isLoggedInSubject = new BehaviorSubject<boolean>(isLoggedIn);
+
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'isLoggedIn') {
+        const isLoggedIn = event.newValue === 'true';
+        this.isLoggedInSubject.next(isLoggedIn);
+        if (!isLoggedIn) {
+          this.router.navigate(['/login']);
+        }
+      }
+    });
   }
+
+
 
   get isLoggedIn(): Observable<boolean> {
     return this.isLoggedInSubject.asObservable();
