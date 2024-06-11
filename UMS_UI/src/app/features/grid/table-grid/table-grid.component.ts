@@ -17,6 +17,7 @@ import { RouterLink } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonFunctionService } from '../../../shared/commonFunction/common.function.service';
 
 @Component({
   selector: 'app-table-grid',
@@ -27,7 +28,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 
 export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
-  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService) { }
 
   @Input() config: TableDataGrid;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -37,16 +38,18 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   displayedColumns: string[] = [];
   dataSource: MatTableDataSource<User>;
   addAnotherColumn: string[];
+  defaultSortColumn: string;
   selectedSortColumns: string[] = [];
   filterDataColumn: string[] = [];
-  sortingOrder: SortDirection;
   selectedUserIds: number[] = [];
   isHeaderSelected: boolean = false;
   defalutPageSize: number;
+  userRole: string;
 
 
   ngOnInit() {
     this.initializeTable();
+    this.userRole = this.commonFunctionService.getUserRole();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -62,24 +65,53 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
 
   initializeTable() {
     if (this.config) {
-      this.displayedColumns = this.config.tableData.displayedColumn;
-      this.filterDataColumn = this.config.tableData.filterDataColumn;
+      this.displayedColumns = this.config.headerColumn.map(i => i.columnName);
+      this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
       this.dataSource = new MatTableDataSource(this.config.tableData.userData);
       this.addAnotherColumn = [...this.displayedColumns];
-      this.addAnotherColumn.unshift('select');
-      if (this.config.tableData.showActionColumn) {
+      if (this.config.tableData.showSelectColumn && this.config.tableFeatures.some(i => i.selectField === "deleteselectedbtn")) {
+        this.addAnotherColumn.unshift('select');
+      }
+      if (this.config.actionButtons.length > 0) {
         this.addAnotherColumn.push('action');
       }
       this.user = this.config.tableData.userData;
+
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      this.selectedSortColumns = [this.config.sorting.matSortActiveColumn];
+      this.defaultSortColumn = this.config.sorting.matSortActiveColumn;
+      this.applySorting(this.config.headerColumn.filter(x => x.isSortable).map(i => i.columnName));
     }
   }
 
   isSortEnabled(column: string): boolean {
     return this.selectedSortColumns.includes(column);
   }
+
+  applySorting(selectedColumns: string[]) {
+    this.selectedSortColumns = [...selectedColumns];
+    this.selectedSortColumns.push(this.defaultSortColumn);
+
+    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
+      if (!this.isSortEnabled(sortHeaderId)) {
+        return '';
+      }
+      return data[sortHeaderId];
+    };
+
+    this.dataSource.sort = this.sort;
+  }
+
+  applyFilter(event: Event, columns: string[]) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+    this.dataSource.filterPredicate = (data: User, filter: string) => {
+      return columns.some(column => {
+        return data[column].toLowerCase().includes(filter);
+      });
+    };
+  }
+
 
   editUser(user: User) {
     if (this.config && this.config.actionButtons) {
@@ -95,7 +127,6 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
       this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
     }
   }
-
 
 
   deleteUser(id: number[]) {
@@ -160,82 +191,11 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  applySorting(selectedColumns: string[]) {
-    this.selectedSortColumns = selectedColumns;
-
-    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
-      if (!this.isSortEnabled(sortHeaderId)) {
-        return '';
-      }
-      return data[sortHeaderId];
-    };
-
-    this.dataSource.sort = this.sort;
-  }
-
-  changeSortingOrder(sortdirection: SortDirection) {
-    this.sortingOrder = sortdirection;
-    if (this.config && this.config.tableFeatures) {
-      const loadUserFeature = this.config.tableFeatures.find(i => i.selectField === 'loaduser');
-      if (loadUserFeature && loadUserFeature.callBack) {
-        loadUserFeature.callBack(null);
-      } else {
-        this.snackBar.open('Something is wrong!!!', 'OK');
-      }
-    }
-    else {
-      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
-    }
-  }
-
-
-
-  changePageSize(pageSizeValue: string) {
-    const pageSize = parseInt(pageSizeValue, 10)
-    if (!Number.isNaN(pageSize)) {
-      this.defalutPageSize = pageSize;
-      this.paginator.pageSize = pageSize;
-    }
-    else {
-      this.defalutPageSize = this.config.pagination?.defaultPageSize;
-      this.paginator.pageSize = this.config.pagination?.defaultPageSize;
-    }
-
-    if (this.config.tableFeatures.find(i => i.selectField === 'loaduser').callBack) {
-      this.config.tableFeatures.find(i => i.selectField === 'loaduser').callBack(null);
-    }
-    else {
-      this.snackBar.open('Something is wrong!!!', 'OK');
-    }
-
-  }
-
-
-  applyFilter(event: Event, columns: string[]) {
-    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.filter = filterValue;
-    this.dataSource.filterPredicate = (data: User, filter: string) => {
-      return columns.some(column => {
-        return data[column].toLowerCase().includes(filter);
-      });
-    };
-  }
-
-
   get showFilterOption() {
-    return this.config.tableData?.showFilterOption ?? true;
-  }
-
-  get showSortOrderOption() {
-    return this.config.tableData?.showSortOrderOption ?? true;
-  }
-
-  get showSortingByColumnOption() {
-    return this.config.tableData?.showSortingByColumnOption ?? true;
-  }
-
-  get showPageSizeOptionField() {
-    return this.config.tableData?.showPageSizeOption ?? true;
+    if (this.userRole !== 'Admin') {
+      return false;
+    }
+    return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
   }
 
   get pageSize() {
@@ -259,11 +219,14 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get disabledSorting() {
+    if (this.userRole !== 'Admin') {
+      return true;
+    }
     return this.config.sorting?.disabledSorting ?? false;
   }
 
   get sortActiveColumn() {
-    return this.config.sorting?.matSortActiveColumn ?? 'userName';
+    return this.config.sorting?.matSortActiveColumn;
   }
 
   get sortDisabledClear() {
@@ -271,7 +234,17 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get sortDirection() {
-    return this.sortingOrder ?? this.config.sorting?.defaultSortingOrder ?? 'asc';
+    if (this.userRole !== 'Admin') {
+      return '';
+    }
+    return this.config.sorting?.defaultSortingOrder ?? 'asc';
+  }
+
+  hasEditButton(): boolean {
+    return this.config.actionButtons.some(i => i.icon === 'edit');
+  }
+  hasDeleteButton(): boolean {
+    return this.config.actionButtons.some(i => i.icon === 'delete');
   }
 }
 

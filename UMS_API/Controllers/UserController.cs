@@ -28,10 +28,10 @@ namespace UMS_API.Controllers
 
 
         [Authorize]
-        [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        [HttpGet("all/{id}")]
+        public async Task<IActionResult> GetUsers(int id)
         {
-            var user = await _userService.GetUsers();
+            var user = await _userService.GetUsers(id);
             return Ok(user);
         }
 
@@ -50,6 +50,13 @@ namespace UMS_API.Controllers
         {
             if (userDto != null)
             {
+                bool usernameExists = await _userService.UserExists(userDto.UserName,userDto.Email,0);
+
+                if (usernameExists)
+                {
+                    return Conflict("Username already exists"); 
+                }
+
                 var user = _mapper.Map<User>(userDto);
 
                 var addUser = await _userService.AddUser(user);
@@ -61,10 +68,18 @@ namespace UMS_API.Controllers
             return NotFound();
         }
 
+
         [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
         {
+            bool usernameExists = await _userService.UserExists(userDto.UserName,userDto.Email, id);
+
+            if (usernameExists)
+            {
+                return Conflict("Username already exists");
+            }
+
             if (userDto == null && id == 0)
                 return BadRequest();
 
@@ -81,8 +96,8 @@ namespace UMS_API.Controllers
         }
 
         [Authorize]
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser([FromBody] int[] id)
         {
             var result = await _userService.DeleteUser(id);
 

@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { CommonModule } from '@angular/common';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { CommonFunctionService } from '../../../../../shared/commonFunction/common.function.service';
 
 @Component({
   selector: 'app-navbar',
@@ -15,22 +16,31 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 })
 export class NavbarComponent {
   isLoggedIn: boolean = false;
+  userRole: string;
 
-  constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar) { }
+  constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService) { }
 
   ngOnInit(): void {
     this.authService.isLoggedIn.subscribe((loggedIn: boolean) => {
       this.isLoggedIn = loggedIn;
     });
+
   }
 
   getNavigationLinks(): { label: string, route: string }[] {
-    if (this.isLoggedIn) {
+    this.userRole = this.commonFunctionService.getUserRole();
+    if (this.isLoggedIn && this.userRole === "Admin") {
       return [
         { label: 'User', route: '/Ums/user' },
         { label: 'Add_User', route: '/Ums/adduser' }
       ];
-    } else {
+    }
+    else if (this.isLoggedIn && this.userRole !== "Admin") {
+      return [
+        { label: 'User', route: '/Ums/user' },
+      ];
+    }
+    else {
       return [
         { label: 'Login', route: '/login' },
       ];

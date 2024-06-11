@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using UMS_BusinessLogic.Services;
 using UMS_DataAccess.Dto;
 
@@ -31,20 +32,31 @@ namespace UMS_API.Controllers
             if (loginDto != null)
             {
                 bool isAuthenticated = await _userService.Authenticate(loginDto.UserName, loginDto.Password);
+                
 
                 if (isAuthenticated)
                 {
-                    var token = _jwtService.GetJwtToken(loginDto.UserName);
+                    var userRoles = await _userService.GetUserRoles(loginDto.UserName);
+
+                    int? role = userRoles.RoleId;
+                    string roles = role switch
+                    {
+                        1 => "Admin",
+                        2 => "User",
+                        _ => "User"
+                    };
+
+                    var token = _jwtService.GetJwtToken(loginDto.UserName,roles);
                     response.success = true;
                     response.message = "Login Successfull";
                     response.token = token;
+                    response.role = roles;
+                    response.id = userRoles.Id;
                     return Ok(response);
                 }
                 else
                 {
                     response.success = false;
-                    response.message = "Invalid credentials";
-                    response.token = null;
                     return Ok(response);
                 }
             }

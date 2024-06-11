@@ -9,7 +9,7 @@ namespace UMS_BusinessLogic.Services
 {
     public interface IJwtService
     {
-        public string GetJwtToken(string username);
+        public string GetJwtToken(string username,string role);
         public bool VerifyToken(string token, out JwtSecurityToken jwttoken);
     }
 }

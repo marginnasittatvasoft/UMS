@@ -36,20 +36,20 @@ namespace UMS_BusinessLogic.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                throw ex;
+                throw;
             }
         }
 
-        public async Task<List<User>> GetUsers()
+        public async Task<List<User>> GetUsers(int id)
         {
             try
             {
-                return await _userRepositories.GetAllUsers();
+                return await _userRepositories.GetAllUsers(id);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                throw ex;
+                throw;
             }
         }
 
@@ -62,7 +62,20 @@ namespace UMS_BusinessLogic.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                throw ex;
+                throw;
+            }
+        }
+
+        public async Task<bool> UserExists(string username, string email, int id)
+        {
+            try
+            {
+                return await _userRepositories.UserExists(username,email,id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
             }
         }
 
@@ -86,7 +99,7 @@ namespace UMS_BusinessLogic.Services
             }
         }
 
-        public async Task<bool> DeleteUser(int id)
+        public async Task<bool> DeleteUser(int[] id)
         {
             try
             {
@@ -95,7 +108,7 @@ namespace UMS_BusinessLogic.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                throw ex;
+                throw;
             }
         }
 
@@ -109,11 +122,22 @@ namespace UMS_BusinessLogic.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
-                throw ex;
+                throw;
             }
         }
 
-
+        public async Task<User> GetUserRoles(string username)
+        {
+            try
+            {
+                return await _userRepositories.GetUserByUsername(username);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
 
     }
 }

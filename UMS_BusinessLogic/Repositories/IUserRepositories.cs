@@ -11,14 +11,20 @@ namespace UMS_BusinessLogic.Repositories
     {
         Task<User> GetUserById(int id);
 
-        Task<List<User>> GetAllUsers();
+        Task<List<User>> GetAllUsers(int id);
+
+        Task<bool> UserExists(string username, string email, int id);
 
         Task<User> AddUser(User user);
 
         Task<User> UpdateUser(User user);
 
-        Task<bool> DeleteUser(int id);
+        Task<bool> DeleteUser(int[] id);
 
         bool AuthenticateUser(string username, string password);
+
+
+        Task<User> GetUserByUsername(string username);
+        
     }
 }

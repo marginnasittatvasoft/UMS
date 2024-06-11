@@ -12,8 +12,8 @@ export class UserService {
 
   constructor(private http: HttpClient) { }
 
-  getUsers = (): Observable<User[]> => {
-    return this.http.get<User[]>(this.baseUrl + endPoint.Users);
+  getUsers = (id: number): Observable<User[]> => {
+    return this.http.get<User[]>(this.baseUrl + endPoint.AllUsers + id);
   }
 
   getUserById(id: number): Observable<User[]> {
@@ -28,11 +28,8 @@ export class UserService {
     return this.http.put<void>(this.baseUrl + endPoint.Users + user.id, user);
   }
 
-  deleteUser(ids: number[]): Observable<void[]> {
-    const deleteRequests = ids.map(id =>
-      this.http.delete<void>(this.baseUrl + endPoint.Users + id)
-    );
-    return forkJoin(deleteRequests);
+  deleteUser(ids: number[]): Observable<void> {
+    return this.http.delete<void>(this.baseUrl + endPoint.Users, { body: ids });
   }
 
 }

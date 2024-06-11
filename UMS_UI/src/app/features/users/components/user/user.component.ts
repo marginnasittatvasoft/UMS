@@ -19,6 +19,8 @@ import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent } from '@a
 import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal.component';
 import { TableGridComponent } from '../../../grid/table-grid/table-grid.component';
 import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 
 
 @Component({
@@ -31,27 +33,41 @@ import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config
 
 export class UserComponent implements OnInit {
 
-  constructor(private userService: UserService, public dialog: MatDialog) { }
+  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService) { }
   datagridConfig: TableDataGrid;
   user: User[] = [];
+  userRole: string;
 
   ngOnInit(): void {
     this.loadUsers();
     this.loadTable();
   }
 
+
   loadUsers() {
-    this.userService.getUsers().subscribe((data) => {
-      this.user = data;
-      this.loadTable();
-    });
+    const idString = this.commonFunctionService.getUserId();
+    if (idString) {
+      const id = Number(idString);
+      if (!isNaN(id)) {
+        this.userService.getUsers(id).subscribe((data) => {
+          this.user = data;
+          this.userRole = this.commonFunctionService.getUserRole();
+          this.loadTable();
+        });
+      } else {
+        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+      }
+    } else {
+      this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+    }
   }
+
 
   loadTable() {
     this.datagridConfig = {
       pagination: {
-        defaultPageSize: 2,
-        pageSizeOption: [10, 15, 20],
+        defaultPageSize: 5,
+        pageSizeOption: [5, 10, 15],
         showFirstLastButton: true,
         hidePageSizeOption: false,
         disabledPagination: false
@@ -63,15 +79,53 @@ export class UserComponent implements OnInit {
         defaultSortingOrder: 'desc'
       },
       tableData: {
-        displayedColumn: ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state'],
-        filterDataColumn: ['userName', 'firstName', 'lastName', 'email'],
-        showActionColumn: true,
+        showSelectColumn: true,
         userData: this.user,
-        showFilterOption: true,
-        showSortOrderOption: true,
-        showSortingByColumnOption: true,
-        showPageSizeOption: true,
+
       },
+      headerColumn: [
+        {
+          columnName: 'userName',
+          isSortable: false,
+          isFilterable: true,
+        },
+        {
+          columnName: 'firstName',
+          isSortable: false,
+          isFilterable: true,
+        },
+        {
+          columnName: 'lastName',
+          isSortable: true,
+          isFilterable: false,
+        },
+        {
+          columnName: 'email',
+          isSortable: false,
+          isFilterable: false,
+        },
+        {
+          columnName: 'phone',
+          isSortable: true,
+          isFilterable: false,
+        },
+        {
+          columnName: 'street',
+          isSortable: true,
+          isFilterable: false,
+        },
+        {
+          columnName: 'city',
+          isSortable: true,
+          isFilterable: false,
+        },
+        {
+          columnName: 'state',
+          isSortable: true,
+          isFilterable: false,
+        },
+
+      ],
       actionButtons: [
         {
           icon: 'edit',
@@ -124,7 +178,7 @@ export class UserComponent implements OnInit {
             this.loadUsers();
           },
           error: (error) => {
-            console.error('There was an error!', error);
+            this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
           },
         });
       }
@@ -146,163 +200,9 @@ export class UserComponent implements OnInit {
         this.loadUsers();
       },
       error: (error) => {
-        console.error('There was an error deleting users!', error);
+        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
       }
     });
   }
 }
 
-// displayedColumns: string[] = ['userName', 'firstName', 'lastName', 'email', 'phone', 'street', 'city', 'state', 'action'];
-// addSelectColumn: string[];
-// dataSource: MatTableDataSource<User>;
-// pageSizeOptions: number[] = [5, 10, 20];
-// pageSize: number = 5;
-// selectedSortColumns: string[] = ['userName'];
-// defaultSortOrder: SortDirection = 'desc';
-// selectedUserIds: number[] = [];
-// isHeaderSelected: boolean = false;
-
-// @ViewChild(MatPaginator) paginator: MatPaginator;
-// @ViewChild(MatSort) sort: MatSort;
-
-// constructor(private userService: UserService, public dialog: MatDialog) { }
-
-// ngOnInit() {
-//   this.dataSource = new MatTableDataSource([]);
-//   this.addSelectColumn = [...this.displayedColumns];
-//   this.addSelectColumn.unshift('select')
-//   this.loadUsers();
-// }
-
-// ngAfterViewInit(): void {
-//   this.dataSource.paginator = this.paginator;
-//   this.dataSource.sort = this.sort;
-// }
-
-// loadUsers() {
-//   this.userService.getUsers().subscribe((data) => {
-//     this.dataSource.data = data;
-//     this.user = data;
-//     this.applySorting(['userName']);
-//   });
-// }
-
-// applyFilter(event: Event) {
-//   const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-//   this.dataSource.filter = filterValue;
-//   this.dataSource.filterPredicate = (data: User, filter: string) => {
-//     return data.firstName.toLowerCase().includes(filter) ||
-//       data.lastName.toLowerCase().includes(filter) ||
-//       data.email.toLowerCase().includes(filter) ||
-//       data.userName.toLowerCase().includes(filter);
-//   };
-// }
-
-// changePageSize(pageSizeValue: string) {
-//   const pageSize = parseInt(pageSizeValue, 10);
-//   this.pageSize = pageSize;
-//   this.paginator.pageSize = pageSize;
-//   this.loadUsers();
-// }
-
-// isSortEnabled(column: string): boolean {
-//   return this.selectedSortColumns.includes(column);
-// }
-
-// applySorting(selectedColumns: string[]) {
-//   this.selectedSortColumns = selectedColumns;
-
-//   this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
-//     if (!this.isSortEnabled(sortHeaderId) || sortHeaderId === 'action') {
-//       return '';
-//     }
-//     return data[sortHeaderId];
-//   };
-
-//   this.dataSource.sort = this.sort;
-// }
-
-// EditUserForm(user: User) {
-//   console.log(user);
-//   const dialogRef = this.dialog.open(AddEditUserComponent, {
-//     data: {
-//       user: user ? { ...user } : null
-//     }
-//   });
-//   dialogRef.afterClosed().subscribe(result => {
-//     this.loadUsers();
-//   });
-// }
-
-// deleteUser(id: number[]) {
-//   const dialogRef = this.dialog.open(UserDeleteModalComponent);
-//   dialogRef.afterClosed().subscribe(result => {
-//     if (result) {
-//       this.userService.deleteUser(id).subscribe({
-//         next: () => {
-//           this.loadUsers();
-//         },
-//         error: (error) => {
-//           console.error('There was an error!', error);
-//         },
-//       });
-//     }
-//   });
-
-// }
-
-// isCheckboxSelected(userId: number): boolean {
-//   return this.selectedUserIds.includes(userId);
-// }
-
-// toggleSelectAll(event: any) {
-//   this.isHeaderSelected = event.checked;
-//   if (this.isHeaderSelected) {
-//     this.selectedUserIds = this.user.map(user => user.id);
-//   } else {
-//     this.selectedUserIds = [];
-//   }
-// }
-
-// toggleSelection(event: MatCheckboxChange, userId: number) {
-//   if (event.checked) {
-//     this.selectedUserIds.push(userId);
-//   } else {
-//     const index = this.selectedUserIds.indexOf(userId);
-//     if (index !== -1) {
-//       this.selectedUserIds.splice(index, 1);
-//     }
-//   }
-// }
-
-// isAllCellsSelected(): boolean {
-//   return this.selectedUserIds.length === this.user.length;
-// }
-
-// deleteSelectedUsers(): void {
-//   if (this.selectedUserIds.length === 0) {
-//     return;
-//   }
-//   const dialogRef = this.dialog.open(UserDeleteModalComponent);
-//   dialogRef.afterClosed().subscribe(result => {
-//     if (result) {
-//       this.performDeletion();
-//     }
-//     else {
-//       this.toggleSelectAll(false);
-//     }
-//   });
-// }
-
-// performDeletion(): void {
-//   this.userService.deleteUser(this.selectedUserIds).subscribe({
-//     next: () => {
-//       this.loadUsers();
-//       this.selectedUserIds = [];
-//     },
-//     error: (error) => {
-//       console.error('There was an error deleting users!', error);
-//     }
-//   });
-//   this.isHeaderSelected = false;
-// }

@@ -108,6 +108,7 @@
                 <input matInput type="text" formControlName="city" />
             </mat-form-field>
         </div>
+
         <div class="row">
 
             <mat-form-field class="mb-3 col" appearance="fill">
@@ -129,8 +130,16 @@
             </mat-form-field>
 
         </div>
-        @if (!isDialogMode) {
+
         <div class="row">
+            <mat-form-field class="mb-3 col-6" appearance="fill">
+                <mat-label>Role Type</mat-label>
+                <mat-select formControlName="roleId">
+                    <mat-option value='1'>Admin</mat-option>
+                    <mat-option value='2'>User</mat-option>
+                </mat-select>
+            </mat-form-field>
+            @if (!isDialogMode || userRole!=='Admin') {
             <mat-form-field class="mb-3 col-6" appearance="fill">
                 <mat-label>Password</mat-label>
                 <input matInput type="text" formControlName="password" />
@@ -142,8 +151,8 @@
                 </mat-error>
                 }
             </mat-form-field>
+            }
         </div>
-        }
 
         <div class="d-flex justify-content-end" *ngIf="!isDialogMode">
             <button mat-raised-button color="warn" class="me-2">Cancel</button>

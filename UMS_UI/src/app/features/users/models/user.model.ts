@@ -9,4 +9,5 @@ export interface User {
     state?: string;
     userName: string;
     password: string;
+    roleId: number;
 }

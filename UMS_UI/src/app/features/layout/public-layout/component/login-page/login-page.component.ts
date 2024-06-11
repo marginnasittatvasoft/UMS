@@ -39,7 +39,7 @@ export class LoginPageComponent {
       this.authService.login(data).subscribe(result => {
         if (result.success) {
           this.snackBar.open('Login Successful', 'OK', { duration: 1000 });
-          this.authService.setToken(result.token);
+          this.commonFunctionService.setToken(result.token);
           this.router.navigate(['Ums/user'])
         } else {
           this.snackBar.open('Invalid Credentials!!', 'OK', { duration: 1000 });

@@ -53,5 +53,15 @@ export class CommonFunctionService {
         return '';
     }
 
+    setToken(tokenValue: string) {
+        localStorage.setItem('token', tokenValue)
+    }
+
+    getUserRole() {
+        return localStorage.getItem('role')
+    }
+    getUserId() {
+        return localStorage.getItem('id')
+    }
 }
 

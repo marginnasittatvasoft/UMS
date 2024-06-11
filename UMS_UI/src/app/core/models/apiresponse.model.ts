@@ -1,5 +1,7 @@
 export interface ApiResponseDTO<T> {
     success: boolean,
+    role: string,
     message: string,
-    token: T
+    token: T,
+    id: number
 }

@@ -41,5 +41,7 @@ namespace UMS_DataAccess.Models
 
         public bool IsDeleted { get; set; }
 
+        public int RoleId { get; set; }
+
     }
 }

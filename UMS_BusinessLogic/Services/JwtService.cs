@@ -22,7 +22,8 @@ namespace UMS_BusinessLogic.Services
             _logger = logger;
 
         }
-        public string GetJwtToken(string username)
+
+        public string GetJwtToken(string username, string role)
         {
             try
             {
@@ -35,6 +36,7 @@ namespace UMS_BusinessLogic.Services
                     Subject = new ClaimsIdentity(new[]
                     {
                     new Claim(ClaimTypes.Name, username),
+                     new Claim(ClaimTypes.Role, role),
                 }),
                     Expires = DateTime.UtcNow.AddMinutes(30),
                     SigningCredentials = credentials
@@ -43,12 +45,12 @@ namespace UMS_BusinessLogic.Services
                 var token = tokenHandler.CreateToken(tokenDescriptor);
                 return tokenHandler.WriteToken(token);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
                 throw ex;
             }
-            
+
         }
 
         public bool VerifyToken(string token, out JwtSecurityToken jwttoken)
@@ -75,7 +77,7 @@ namespace UMS_BusinessLogic.Services
                 }
                 return false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex.ToString());
                 jwttoken = null;

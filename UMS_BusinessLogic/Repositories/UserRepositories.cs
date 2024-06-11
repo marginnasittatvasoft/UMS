@@ -35,20 +35,25 @@ namespace UMS_BusinessLogic.Repositories
             catch (Exception ex)
             {
                 _logger.LogError("Getting error with id" + ex.ToString());
-                throw ex;
+                throw;
             }
         }
 
-        public async Task<List<User>> GetAllUsers()
+        public async Task<List<User>> GetAllUsers(int id)
         {
             try
             {
-                return await _context.Users.Where(i => !i.IsDeleted).ToListAsync();
+                if(_context.Users.Any(i=> i.Id==id && !i.IsDeleted && i.RoleId==1))
+                {
+                    return await _context.Users.Where(i => !i.IsDeleted).ToListAsync();
+                    
+                }
+                return await _context.Users.Where(i => !i.IsDeleted && i.Id == id).ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Getting error with users"+ ex.ToString());
-                throw ex;
+                _logger.LogError("Getting error with users" + ex.ToString());
+                throw;
             }
         }
 
@@ -62,10 +67,27 @@ namespace UMS_BusinessLogic.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError("Getting error with Add User"+ ex.ToString());
-                throw ex;
+                _logger.LogError("Getting error with Add User" + ex.ToString());
+                throw;
             }
         }
+
+        public async Task<bool> UserExists(string username, string email, int id)
+        {
+            try
+            {
+                var userExists = await _context.Users
+                    .FirstOrDefaultAsync(u => (u.UserName == username || u.Email == email) && u.Id != id);
+
+                return userExists != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occurred while checking user existence: " + ex.ToString());
+                throw;
+            }
+        }
+
 
         public async Task<User> UpdateUser(User user)
         {
@@ -77,39 +99,44 @@ namespace UMS_BusinessLogic.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError("Getting error with Update User"+ ex.ToString());
-                throw ex;
+                _logger.LogError("Getting error with Update User" + ex.ToString());
+                throw;
             }
         }
 
-        public async Task<bool> DeleteUser(int id)
+        public async Task<bool> DeleteUser(int[] ids)
         {
             try
             {
-                var existingUser = await _context.Users.FindAsync(id);
-                if (existingUser == null)
-                    return false;
+                foreach (var id in ids)
+                {
+                    var existingUser = await _context.Users.FindAsync(id);
+                    if (existingUser == null)
+                        return false;
 
-                existingUser.IsDeleted = true;
+                    existingUser.IsDeleted = true;
+                }
+
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Getting error with Delete User"+ ex.ToString());
-                throw ex;
+                _logger.LogError(ex, "Error occurred while deleting users with IDs: {Ids}", ids);
+                throw;
             }
         }
+
 
 
         public bool AuthenticateUser(string username, string password)
         {
             try
             {
-                if(username != null)
+                if (username != null)
                 {
-                    User? user = _context.Users.FirstOrDefault(i => i.UserName == username);
-                    if(user != null)
+                    User? user = _context.Users.FirstOrDefault(i => i.UserName == username && !i.IsDeleted);
+                    if (user != null)
                     {
                         return _context.Users.Any(i => i.UserName == username && i.Password == password);
                     }
@@ -118,12 +145,31 @@ namespace UMS_BusinessLogic.Repositories
                 }
                 return false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError("Getting error with Authenticate" + ex.ToString());
-                throw ex;
+                throw;
             }
 
+        }
+
+
+        public async Task<User> GetUserByUsername(string username)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
+                if (user == null)
+                {
+                    _logger.LogError("User with username not found", user);
+                }
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Getting error with username" + ex.ToString());
+                throw;
+            }
         }
     }
 }

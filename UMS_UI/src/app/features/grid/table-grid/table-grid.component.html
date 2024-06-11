@@ -1,48 +1,17 @@
-<div class="my-1 d-flex justify-content-end">
-    <mat-form-field class="me-3" *ngIf="showSortingByColumnOption">
-        <mat-select placeholder="Sort Columns" [value]="selectedSortColumns"
-            multiple (selectionChange)="applySorting($event.value)">
-            <mat-option *ngFor="let column of displayedColumns"
-                [value]="column">
-                {{ column | titlecase }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-
-    <mat-form-field class="me-3" *ngIf="showSortOrderOption">
-        <mat-select placeholder="Sort Direction" [value]="sortDirection"
-            (selectionChange)="changeSortingOrder($event.value)">
-            <mat-option value="asc">
-                Ascending
-            </mat-option>
-            <mat-option value="desc">
-                Descending
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-
-    <mat-form-field class="me-3" *ngIf="showFilterOption">
+<div class="mb-3 d-flex justify-content-end align-items-center">
+    <mat-form-field class="p-0" *ngIf="showFilterOption"
+        style="margin-bottom: -1.25em">
         <input matInput (keyup)="applyFilter($event,filterDataColumn)"
             placeholder="Search">
     </mat-form-field>
 
-    <mat-form-field class="mb-0"
-        *ngIf="showPageSizeOptionField && !hidePageSizeOption">
-        <input matInput type="number" placeholder="Page Size"
-            #pageSizeInput
-            (change)="changePageSize(pageSizeInput.value)">
-    </mat-form-field>
+    <a mat-raised-button color="primary" class="ms-3" routerLink="/Ums/adduser"
+        *ngIf="userRole==='Admin'">Add
+        User</a>
 
-</div>
-
-<div class="mb-3 d-flex justify-content-end">
-
-    <button mat-raised-button color="warn" class="me-3"
+    <button mat-raised-button color="warn" class="ms-3"
         *ngIf="selectedUserIds.length>0"
         (click)="deleteSelectedUsers()">Delete Selected</button>
-
-    <a mat-raised-button color="primary" routerLink="/Ums/adduser">Add
-        User</a>
 
 </div>
 
@@ -83,11 +52,11 @@
             </th>
             <td mat-cell *matCellDef="let user">
                 <button mat-icon-button color="primary"
-                    (click)="editUser(user)">
+                    (click)="editUser(user)" *ngIf="hasEditButton()">
                     <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button color="warn"
-                    (click)="deleteUser([user.id])">
+                    (click)="deleteUser([user.id])" *ngIf="hasDeleteButton()">
                     <mat-icon>delete</mat-icon>
                 </button>
             </td>
@@ -97,7 +66,8 @@
         <tr mat-row *matRowDef="let row; columns: addAnotherColumn;"></tr>
     </table>
 
-    <mat-paginator [pageSizeOptions]="pageSizeOptions ? pageSizeOptions : []"
+    <mat-paginator *ngIf="userRole==='Admin'"
+        [pageSizeOptions]="pageSizeOptions ? pageSizeOptions : []"
         [pageSize]="pageSize" [showFirstLastButtons]="showFirstLastButtons"
         [hidePageSize]="hidePageSizeOption" [disabled]="disabledPagination"
         [length]="pageSize"

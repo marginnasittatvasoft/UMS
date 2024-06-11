@@ -408,7 +408,6 @@ export {
   _DisposeViewRepeaterStrategy,
   _RecycleViewRepeaterStrategy,
   SelectionModel,
-  getMultipleValuesInSingleSelectionError,
   UniqueSelectionDispatcher
 };
-//# sourceMappingURL=chunk-43AJSI6U.js.map
+//# sourceMappingURL=chunk-Z2XDYTV3.js.map

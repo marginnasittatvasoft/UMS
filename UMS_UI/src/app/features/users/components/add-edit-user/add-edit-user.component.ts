@@ -25,18 +25,25 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class AddEditUserComponent {
   addUserForm!: FormGroup;
   isDialogMode: boolean = false;
+  userRole: string;
 
 
   constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router, private snackBar: MatSnackBar) {
   }
 
   ngOnInit(): void {
+    this.userRole = this.commonFunctionService.getUserRole();
     this.isDialogMode = !!this.data;
     this.createForm();
     if (this.isDialogMode && this.data && this.data.user) {
-      this.addUserForm.patchValue(this.data.user);
+      const userData = this.data.user;
+      this.addUserForm.patchValue(userData);
+      const roleId = userData.roleId;
+      if (roleId) {
+        const userType = roleId === 1 ? '1' : '2';
+        this.addUserForm.get('roleId').patchValue(userType);
+      }
     }
-
   }
 
   createForm() {
@@ -51,6 +58,7 @@ export class AddEditUserComponent {
       state: ['', []],
       userName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
       password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+\-]).{6,16}$/)]],
+      roleId: ['', [Validators.required]],
     });
   }
 
@@ -69,11 +77,16 @@ export class AddEditUserComponent {
     this.userService.addUser(this.addUserForm.value).subscribe({
       next: () => {
         this.resetForm();
-        this.snackBar.open('Data Added Successfully!!!', 'OK', { duration: 1000 });
+        this.snackBar.open('Data Added Successfully!', 'OK', { duration: 1000 });
         this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
-        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        if (error.status === 409) {
+          this.snackBar.open('User already exists!', 'OK', { duration: 1000 });
+          this.addUserForm.patchValue({ userName: '' });
+        } else {
+          this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        }
       },
     });
   }
@@ -81,10 +94,15 @@ export class AddEditUserComponent {
   submitDialogForm() {
     this.userService.updateUser(this.addUserForm.value).subscribe({
       next: () => {
-        this.snackBar.open('Data Added Successfully!!!', 'OK', { duration: 1000 });
+        this.snackBar.open('Data Updated Successfully!', 'OK', { duration: 1000 });
       },
       error: (error) => {
-        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        if (error.status === 409) {
+          this.snackBar.open('User already exists!', 'OK', { duration: 1000 });
+          this.addUserForm.patchValue({ userName: '' });
+        } else {
+          this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        }
       },
     });
   }

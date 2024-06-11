@@ -11,5 +11,7 @@ namespace UMS_DataAccess.Dto
         public bool success { get; set; }
         public string? message { get; set; }
         public T token { get; set; }
+        public string role { get; set; }
+        public int id { get; set; }
     }
 }
