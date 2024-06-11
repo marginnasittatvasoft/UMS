@@ -8,8 +8,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using UMS_BusinessLogic.Services.Interfaces;
 
-namespace UMS_BusinessLogic.Services
+namespace UMS_BusinessLogic.Services.Repos
 {
     public class JwtService : IJwtService
     {
@@ -20,9 +21,14 @@ namespace UMS_BusinessLogic.Services
         {
             _configuration = configuration;
             _logger = logger;
-
         }
 
+        /// <summary>
+        /// Generates a JWT token for a given username and role.
+        /// </summary>
+        /// <param name="username">The username for which the token is generated.</param>
+        /// <param name="role">The role of the user for which the token is generated.</param>
+        /// <returns>A JWT token as a string.</returns>
         public string GetJwtToken(string username, string role)
         {
             try
@@ -35,9 +41,9 @@ namespace UMS_BusinessLogic.Services
                 {
                     Subject = new ClaimsIdentity(new[]
                     {
-                    new Claim(ClaimTypes.Name, username),
-                     new Claim(ClaimTypes.Role, role),
-                }),
+                        new Claim(ClaimTypes.Name, username),
+                        new Claim(ClaimTypes.Role, role),
+                    }),
                     Expires = DateTime.UtcNow.AddMinutes(30),
                     SigningCredentials = credentials
                 };
@@ -50,9 +56,14 @@ namespace UMS_BusinessLogic.Services
                 _logger.LogError(ex.ToString());
                 throw ex;
             }
-
         }
 
+        /// <summary>
+        /// Verifies the provided JWT token.
+        /// </summary>
+        /// <param name="token">The JWT token to verify.</param>
+        /// <param name="jwttoken">The validated JWT token if verification is successful.</param>
+        /// <returns>A boolean indicating whether the token is valid.</returns>
         public bool VerifyToken(string token, out JwtSecurityToken jwttoken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -63,19 +74,15 @@ namespace UMS_BusinessLogic.Services
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
-,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero,
                 }, out SecurityToken validatedToken);
+
                 jwttoken = (JwtSecurityToken)validatedToken;
 
-                if (jwttoken != null)
-                {
-                    return true;
-                }
-                return false;
+                return jwttoken != null;
             }
             catch (Exception ex)
             {

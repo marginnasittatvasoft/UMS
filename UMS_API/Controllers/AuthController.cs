@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using UMS_BusinessLogic.Services;
+using UMS_BusinessLogic.Services.Interfaces;
 using UMS_DataAccess.Dto;
 
 namespace UMS_API.Controllers

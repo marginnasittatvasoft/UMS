@@ -8,8 +8,10 @@ using Serilog.Events;
 using System.IO;
 using System.Text;
 using UMS_API.Extensions;
-using UMS_BusinessLogic.Repositories;
-using UMS_BusinessLogic.Services;
+using UMS_BusinessLogic.Repositories.Interfaces;
+using UMS_BusinessLogic.Repositories.Repos;
+using UMS_BusinessLogic.Services.Interfaces;
+using UMS_BusinessLogic.Services.Repos;
 using UMS_DataAccess.Models;
 
 var builder = WebApplication.CreateBuilder(args);

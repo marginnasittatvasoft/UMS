@@ -138,6 +138,12 @@ export class UserComponent implements OnInit {
           callBack: (data) => {
             this.deleteUser(data);
           }
+        },
+        {
+          icon: 'home',
+          callBack: (data) => {
+            this.deleteUser(data);
+          }
         }
       ],
       tableFeatures: [

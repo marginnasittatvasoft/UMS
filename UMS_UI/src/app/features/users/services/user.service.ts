@@ -16,10 +16,6 @@ export class UserService {
     return this.http.get<User[]>(this.baseUrl + endPoint.AllUsers + id);
   }
 
-  getUserById(id: number): Observable<User[]> {
-    return this.http.get<User[]>(this.baseUrl + endPoint.Users + id);
-  }
-
   addUser(user: User): Observable<void> {
     return this.http.post<void>(this.baseUrl + endPoint.Users, user);
   }

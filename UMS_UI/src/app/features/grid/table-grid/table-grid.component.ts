@@ -76,7 +76,6 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
         this.addAnotherColumn.push('action');
       }
       this.user = this.config.tableData.userData;
-
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
       this.defaultSortColumn = this.config.sorting.matSortActiveColumn;
