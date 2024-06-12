@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckbox, MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Route, Router, RouterLink } from '@angular/router';
 import { MatSort, Sort, MatSortModule, SortDirection } from '@angular/material/sort';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
@@ -20,6 +20,7 @@ import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal
 import { TableGridComponent } from '../../../grid/table-grid/table-grid.component';
 import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -30,9 +31,11 @@ import { CommonFunctionService } from '../../../../shared/commonFunction/common.
   styleUrl: './user.component.css'
 })
 
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit, OnDestroy {
 
-  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
+  private subscriptions: Subscription = new Subscription();
+
+  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService, public router: Router) { }
   datagridConfig: TableDataGrid;
   user: User[] = [];
   isAdmin: boolean;
@@ -43,47 +46,63 @@ export class UserComponent implements OnInit {
     this.loadTable();
   }
 
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
 
   loadUsers() {
     this.userId = this.commonFunctionService.getUserId();
     if (this.userId) {
       const id = Number(this.userId);
       if (!isNaN(id)) {
-        this.userService.getUsers(id).subscribe((data) => {
-          this.user = data;
-          this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
-          this.loadTable();
+        const loadUsersSub = this.userService.getUsers(id).subscribe({
+          next: (data) => {
+            this.user = data;
+            this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
+            this.loadTable();
+          },
+          error: () => {
+            this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
+          }
         });
+        this.subscriptions.add(loadUsersSub);
       } else {
-        this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+        this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
       }
     } else {
-      this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+      this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
     }
   }
-
 
   loadTable() {
     this.datagridConfig = {
       pagination: {
         defaultPageSize: 5,
         pageSizeOption: [5, 10, 15],
-        showFirstLastButton: true,
-        hidePageSizeOption: false,
-        disabledPagination: false
+        isShowFirstLastButton: true,
+        isHidePageSizeOption: false,
+        isDisabledPagination: false
       },
       sorting: {
         disabledSorting: false,
-        matSortActiveColumn: 'userName',
+        defaultSortActiveColumn: 'userName',
         sortDisableClear: true,
         defaultSortingOrder: 'desc'
       },
-      tableData: {
+      tableGridData: {
         showSelectColumn: true,
-        userData: this.user,
+        tableData: this.user,
         userRole: this.commonFunctionService.getUserRole(),
         userId: Number(this.userId),
-
+        callBackById: (data) => {
+          const isDisabledByid = data.id === Number(this.userId)
+          return isDisabledByid;
+        },
+        callBackByIcon: (data) => {
+          const isDisabledByIcon = data.icon === 'delete'
+          return isDisabledByIcon;
+        },
       },
       headerColumn: [
         {
@@ -149,11 +168,25 @@ export class UserComponent implements OnInit {
           this.deleteSelectedUsers(data);
         },
       },
-
+      addFetures: [{
+        btnText: "Add User",
+        color: 'primary',
+        isVisible: this.isAdmin,
+        callBack: () => {
+          this.navigatePath();
+        },
+      }]
     }
   }
 
+  checkUserid(id: number) {
+    debugger;
+    return id === Number(this.userId);
+  }
 
+  navigatePath() {
+    this.router.navigate(["/Ums/adduser"]);
+  }
   EditUserForm(user: User) {
     const dialogRef = this.dialog.open(AddEditUserComponent, {
       data: {
@@ -169,15 +202,16 @@ export class UserComponent implements OnInit {
     const dialogRef = this.dialog.open(UserDeleteModalComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.userService.deleteUser(id).subscribe({
+        const deleteUserSub = this.userService.deleteUser(id).subscribe({
           next: () => {
-            this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500)
+            this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500);
             this.loadUsers();
           },
-          error: (error) => {
-            this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+          error: () => {
+            this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
           },
         });
+        this.subscriptions.add(deleteUserSub);
       }
     });
   }
@@ -192,15 +226,16 @@ export class UserComponent implements OnInit {
   }
 
   performDeletion(selectedUsers: number[]): void {
-    this.userService.deleteUser(selectedUsers).subscribe({
+    const performDeletionSub = this.userService.deleteUser(selectedUsers).subscribe({
       next: () => {
-        this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500)
+        this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500);
         this.loadUsers();
       },
-      error: (error) => {
-        this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+      error: () => {
+        this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
       }
     });
+    this.subscriptions.add(performDeletionSub);
   }
 }
 

@@ -1,5 +1,5 @@
 
-import { Component, EventEmitter, Inject, Input, OnChanges, Optional, Output, SimpleChanges, input } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, Optional, Output, SimpleChanges, input } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
+import { Subscription } from 'rxjs';
 
 
 @Component({
@@ -21,11 +22,12 @@ import { CommonFunctionService } from '../../../../shared/commonFunction/common.
   templateUrl: './add-edit-user.component.html',
   styleUrl: './add-edit-user.component.css'
 })
-export class AddEditUserComponent {
+export class AddEditUserComponent implements OnDestroy {
   addUserForm!: FormGroup;
   isDialogMode: boolean = false;
   isAdmin: boolean;
   hide = true;
+  private subscriptions: Subscription = new Subscription();
 
 
   constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router) {
@@ -45,7 +47,9 @@ export class AddEditUserComponent {
       }
     }
   }
-
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
   createForm() {
     this.addUserForm = this.formbuilder.group({
       id: ['', []],
@@ -80,38 +84,39 @@ export class AddEditUserComponent {
   }
 
   submitStandaloneForm() {
-    this.userService.addUser(this.addUserForm.value).subscribe({
+    const addUserSub = this.userService.addUser(this.addUserForm.value).subscribe({
       next: () => {
         this.resetForm();
-        this.commonFunctionService.showSnackbar("Data Added Successfully!", 1500)
+        this.commonFunctionService.showSnackbar("Data Added Successfully!", 1500);
         this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
         if (error.status === 409) {
-          this.commonFunctionService.showSnackbar("User already exists!", 1500)
+          this.commonFunctionService.showSnackbar("User already exists!", 1500);
           this.addUserForm.patchValue({ userName: '' });
         } else {
-          this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+          this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
         }
       },
     });
+    this.subscriptions.add(addUserSub);
   }
 
   submitDialogForm() {
-
-    this.userService.updateUser(this.addUserForm.value).subscribe({
+    const updateUserSub = this.userService.updateUser(this.addUserForm.value).subscribe({
       next: () => {
-        this.commonFunctionService.showSnackbar("Data Updated Successfully!", 1500)
+        this.commonFunctionService.showSnackbar("Data Updated Successfully!", 1500);
       },
       error: (error) => {
         if (error.status === 409) {
-          this.commonFunctionService.showSnackbar("User already exists!", 1500)
+          this.commonFunctionService.showSnackbar("User already exists!", 1500);
           this.addUserForm.patchValue({ userName: '' });
         } else {
-          this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
+          this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
         }
       },
     });
+    this.subscriptions.add(updateUserSub);
   }
 
   resetForm() {

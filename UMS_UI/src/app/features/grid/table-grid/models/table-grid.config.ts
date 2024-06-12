@@ -4,12 +4,14 @@ import { TableGridDataConfig } from "./table-grid-data.config";
 import { TableGridAllDeleteFeature } from "./table-grid-all-delete-feature.config";
 import { TableGridPaginatorConfig } from "./table-grid-paginator.config";
 import { TableGridSortingConfig } from "./table-grid-sorting.config";
+import { TableGridAddFeature } from "./table-grid-add-feature.confing";
 
 export interface TableDataGrid {
     pagination?: TableGridPaginatorConfig;
     sorting?: TableGridSortingConfig;
-    tableData: TableGridDataConfig;
+    tableGridData: TableGridDataConfig;
     actionButtons?: TableActionButton[];
     allDeleteFeature?: TableGridAllDeleteFeature;
     headerColumn?: TableGridColumnHeaderConfig[];
+    addFetures?: TableGridAddFeature[];
 }
