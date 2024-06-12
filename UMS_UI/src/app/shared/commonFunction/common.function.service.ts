@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CommonFunctionService {
 
-    constructor() { }
+    constructor(private snackBar: MatSnackBar) { }
 
     controlValidity(formGroup: FormGroup, controlName: string): boolean {
         if (formGroup.get(controlName)?.invalid || formGroup.get(controlName)?.touched) {
@@ -51,6 +52,15 @@ export class CommonFunctionService {
         }
 
         return '';
+    }
+
+    showSnackbar(message: string, duration?: number) {
+        if (duration !== undefined) {
+            this.snackBar.open(message, 'OK', { duration: duration });
+        }
+        else {
+            this.snackBar.open(message, 'OK');
+        }
     }
 
     setToken(tokenValue: string) {

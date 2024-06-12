@@ -1,7 +1,7 @@
 <div class="container mt-3">
     <div class="d-flex justify-content-between">
-        <h1 *ngIf="userRole==='Admin'">Users List</h1>
-        <h1 *ngIf="userRole!=='Admin'">User</h1>
+        <h1 *ngIf="isAdmin">Users List</h1>
+        <h1 *ngIf="!isAdmin">User</h1>
 
     </div>
     <div>

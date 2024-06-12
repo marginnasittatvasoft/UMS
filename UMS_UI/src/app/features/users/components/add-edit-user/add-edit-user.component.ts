@@ -12,7 +12,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -25,14 +24,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class AddEditUserComponent {
   addUserForm!: FormGroup;
   isDialogMode: boolean = false;
-  userRole: string;
+  isAdmin: boolean;
+  hide = true;
 
 
-  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router, private snackBar: MatSnackBar) {
+  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router) {
   }
 
   ngOnInit(): void {
-    this.userRole = this.commonFunctionService.getUserRole();
+    this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
     this.isDialogMode = !!this.data;
     this.createForm();
     if (this.isDialogMode && this.data && this.data.user) {
@@ -51,12 +51,12 @@ export class AddEditUserComponent {
       id: ['', []],
       firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
+      email: [{ value: '', disabled: !this.isAdmin }, [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern("[0-9 ]{10}")]],
       street: ['', [Validators.required, Validators.maxLength(150), Validators.minLength(2)]],
       city: ['', []],
       state: ['', []],
-      userName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
+      userName: [{ value: '', disabled: !this.isAdmin }, [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
       password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+\-]).{6,16}$/)]],
       roleId: ['', [Validators.required]],
     });
@@ -65,6 +65,12 @@ export class AddEditUserComponent {
 
   onSubmit() {
     if (this.addUserForm.valid) {
+      if (this.addUserForm.controls['email'].disabled) {
+        this.addUserForm.controls['email'].enable();
+      }
+      if (this.addUserForm.controls['userName'].disabled) {
+        this.addUserForm.controls['userName'].enable();
+      }
       if (this.isDialogMode) {
         this.submitDialogForm();
       } else {
@@ -77,31 +83,32 @@ export class AddEditUserComponent {
     this.userService.addUser(this.addUserForm.value).subscribe({
       next: () => {
         this.resetForm();
-        this.snackBar.open('Data Added Successfully!', 'OK', { duration: 1000 });
+        this.commonFunctionService.showSnackbar("Data Added Successfully!", 1500)
         this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
         if (error.status === 409) {
-          this.snackBar.open('User already exists!', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("User already exists!", 1500)
           this.addUserForm.patchValue({ userName: '' });
         } else {
-          this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
         }
       },
     });
   }
 
   submitDialogForm() {
+
     this.userService.updateUser(this.addUserForm.value).subscribe({
       next: () => {
-        this.snackBar.open('Data Updated Successfully!', 'OK', { duration: 1000 });
+        this.commonFunctionService.showSnackbar("Data Updated Successfully!", 1500)
       },
       error: (error) => {
         if (error.status === 409) {
-          this.snackBar.open('User already exists!', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("User already exists!", 1500)
           this.addUserForm.patchValue({ userName: '' });
         } else {
-          this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
         }
       },
     });

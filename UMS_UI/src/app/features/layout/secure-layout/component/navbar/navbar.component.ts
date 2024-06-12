@@ -48,7 +48,7 @@ export class NavbarComponent {
   }
 
   logout(): void {
-    this.snackBar.open('Logged out Successfully', '', { duration: 1000 });
+    this.snackBar.open('Logged out Successfully', '', { duration: 1500 });
     this.authService.logout();
     this.router.navigate(['/login']);
   }

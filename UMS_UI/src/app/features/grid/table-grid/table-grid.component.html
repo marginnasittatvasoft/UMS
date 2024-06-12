@@ -1,17 +1,18 @@
 <div class="mb-3 d-flex justify-content-end align-items-center">
-    <mat-form-field class="p-0" *ngIf="showFilterOption"
+    <mat-form-field class="p-0" *ngIf="showFilterOption" appearance="outline"
         style="margin-bottom: -1.25em">
         <input matInput (keyup)="applyFilter($event,filterDataColumn)"
             placeholder="Search">
     </mat-form-field>
 
     <a mat-raised-button color="primary" class="ms-3" routerLink="/Ums/adduser"
-        *ngIf="userRole==='Admin'">Add
+        *ngIf="isAdmin">Add
         User</a>
 
     <button mat-raised-button color="warn" class="ms-3"
         *ngIf="selectedUserIds.length>0"
-        (click)="deleteSelectedUsers()">Delete Selected</button>
+        (click)="this.config.allDeleteFeature.callBack(this.selectedUserIds)">Delete
+        Selected</button>
 
 </div>
 
@@ -28,7 +29,7 @@
                     [checked]="isAllCellsSelected()"></mat-checkbox>
             </th>
             <td mat-cell *matCellDef="let user">
-                <mat-checkbox
+                <mat-checkbox *ngIf="user.id !== userId"
                     (change)="toggleSelection($event, user.id)"
                     [checked]="isHeaderSelected && isCheckboxSelected(user.id)">
                 </mat-checkbox>
@@ -51,22 +52,30 @@
                 Action
             </th>
             <td mat-cell *matCellDef="let user">
-                <button mat-icon-button color="primary"
-                    (click)="editUser(user)" *ngIf="hasEditButton()">
-                    <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn"
-                    (click)="deleteUser([user.id])" *ngIf="hasDeleteButton()">
-                    <mat-icon>delete</mat-icon>
-                </button>
+                <ng-container *ngFor="let button of this.config.actionButtons">
+                    <button
+                        *ngIf="user.id !== this.userId || button.icon !== 'delete'"
+                        mat-icon-button
+                        [color]="button.color"
+                        (click)="button.callBack(user)">
+                        <mat-icon>{{ button.icon }}</mat-icon>
+                    </button>
+                </ng-container>
             </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="addAnotherColumn"></tr>
         <tr mat-row *matRowDef="let row; columns: addAnotherColumn;"></tr>
     </table>
-
-    <mat-paginator *ngIf="userRole==='Admin'"
+    <ng-container
+        *ngIf="isNoUsersFound()">
+        <div class="d-flex justify-content-center mt-3">
+            <h2>No Users Found...</h2>
+        </div>
+    </ng-container>
+    <mat-paginator
+        *ngIf="isAdmin"
+        [hidden]="isNoUsersFound()"
         [pageSizeOptions]="pageSizeOptions ? pageSizeOptions : []"
         [pageSize]="pageSize" [showFirstLastButtons]="showFirstLastButtons"
         [hidePageSize]="hidePageSizeOption" [disabled]="disabledPagination"
@@ -74,4 +83,5 @@
         showFirstLastButtons
         aria-label="Select page of periodic elements">
     </mat-paginator>
+
 </div>

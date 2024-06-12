@@ -16,7 +16,6 @@ import { UserDeleteModalComponent } from '../../users/components/user-delete-mod
 import { RouterLink } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonFunctionService } from '../../../shared/commonFunction/common.function.service';
 
 @Component({
@@ -28,7 +27,7 @@ import { CommonFunctionService } from '../../../shared/commonFunction/common.fun
 })
 
 export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
-  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService) { }
+  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
 
   @Input() config: TableDataGrid;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -45,11 +44,12 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   isHeaderSelected: boolean = false;
   defalutPageSize: number;
   userRole: string;
+  isAdmin: boolean;
+  userId: number;
 
 
   ngOnInit() {
     this.initializeTable();
-    this.userRole = this.commonFunctionService.getUserRole();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -66,20 +66,22 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   initializeTable() {
     if (this.config) {
       this.displayedColumns = this.config.headerColumn.map(i => i.columnName);
+      this.isAdmin = this.config.tableData.userRole === 'Admin';
+      this.userId = this.config.tableData.userId;
       this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
       this.dataSource = new MatTableDataSource(this.config.tableData.userData);
       this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.tableData.showSelectColumn && this.config.tableFeatures.some(i => i.selectField === "deleteselectedbtn")) {
+      if (this.config.tableData.showSelectColumn && this.config.allDeleteFeature.callBack) {
         this.addAnotherColumn.unshift('select');
       }
       if (this.config.actionButtons.length > 0) {
         this.addAnotherColumn.push('action');
       }
       this.user = this.config.tableData.userData;
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
       this.defaultSortColumn = this.config.sorting.matSortActiveColumn;
       this.applySorting(this.config.headerColumn.filter(x => x.isSortable).map(i => i.columnName));
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
     }
   }
 
@@ -95,7 +97,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
       if (!this.isSortEnabled(sortHeaderId)) {
         return '';
       }
-      return data[sortHeaderId];
+      return data[sortHeaderId].toString().toLowerCase();
     };
 
     this.dataSource.sort = this.sort;
@@ -111,39 +113,6 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
     };
   }
 
-
-  editUser(user: User) {
-    if (this.config && this.config.actionButtons) {
-      const editButton = this.config.actionButtons.find(i => i.icon === 'edit');
-      if (editButton && editButton.callBack) {
-        editButton.callBack(user);
-      }
-      else {
-        this.snackBar.open('Something is wrong!!!', 'OK');
-      }
-    }
-    else {
-      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
-    }
-  }
-
-
-  deleteUser(id: number[]) {
-    if (this.config && this.config.actionButtons) {
-      const deleteButton = this.config.actionButtons.find(i => i.icon === 'delete');
-      if (deleteButton && deleteButton.callBack) {
-        deleteButton.callBack(id);
-      }
-      else {
-        this.snackBar.open('Something is wrong!!!', 'OK');
-      }
-    }
-    else {
-      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
-    }
-  }
-
-
   isCheckboxSelected(userId: number): boolean {
     return this.selectedUserIds.includes(userId);
   }
@@ -151,7 +120,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   toggleSelectAll(event: any) {
     this.isHeaderSelected = event.checked;
     if (this.isHeaderSelected) {
-      this.selectedUserIds = this.user.map(user => user.id);
+      this.selectedUserIds = this.user.map(user => user.id).filter(id => id !== this.userId);
     } else {
       this.selectedUserIds = [];
     }
@@ -169,29 +138,19 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   isAllCellsSelected(): boolean {
-    return this.selectedUserIds.length === this.user.length;
+    const selectableUserCount = this.user.filter(user => user.id !== this.userId).length;
+    if (selectableUserCount !== 0) {
+      return this.selectedUserIds.length === selectableUserCount;
+    }
+    return false;
   }
 
-  deleteSelectedUsers(): void {
-    if (this.selectedUserIds.length === 0) {
-      return;
-    }
-    if (this.config && this.config.tableFeatures) {
-      const deleteSelectedButton = this.config.tableFeatures.find(i => i.selectField === 'deleteselectedbtn');
-      if (deleteSelectedButton && deleteSelectedButton.callBack) {
-        deleteSelectedButton.callBack(this.selectedUserIds);
-        this.isHeaderSelected = false;
-      } else {
-        this.toggleSelectAll(false);
-      }
-    }
-    else {
-      this.snackBar.open('Something is wrong with the configuration!!!', 'OK');
-    }
+  isNoUsersFound(): boolean {
+    return this.dataSource.filteredData.length === 0 || this.dataSource.data.length === 0;
   }
 
   get showFilterOption() {
-    if (this.userRole !== 'Admin') {
+    if (!this.isAdmin) {
       return false;
     }
     return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
@@ -218,7 +177,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get disabledSorting() {
-    if (this.userRole !== 'Admin') {
+    if (!this.isAdmin) {
       return true;
     }
     return this.config.sorting?.disabledSorting ?? false;
@@ -233,17 +192,11 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get sortDirection() {
-    if (this.userRole !== 'Admin') {
+    if (!this.isAdmin) {
       return '';
     }
     return this.config.sorting?.defaultSortingOrder ?? 'asc';
   }
 
-  hasEditButton(): boolean {
-    return this.config.actionButtons.some(i => i.icon === 'edit');
-  }
-  hasDeleteButton(): boolean {
-    return this.config.actionButtons.some(i => i.icon === 'delete');
-  }
 }
 

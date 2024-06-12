@@ -35,7 +35,7 @@
     <form [formGroup]="addUserForm">
         <div class="row">
             <input matInput formControlName="id" hidden />
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>First Name</mat-label>
                 <input matInput formControlName="firstName" />
                 @if (commonFunctionService.controlValidity(addUserForm,
@@ -47,7 +47,7 @@
                 }
             </mat-form-field>
 
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>Last Name</mat-label>
                 <input matInput formControlName="lastName" />
                 @if (commonFunctionService.controlValidity(addUserForm,
@@ -62,7 +62,7 @@
         </div>
 
         <div class="row">
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>Email</mat-label>
                 <input matInput type="email" formControlName="email" />
                 @if (commonFunctionService.controlValidity(addUserForm,
@@ -75,7 +75,7 @@
 
             </mat-form-field>
 
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>Phone Number</mat-label>
                 <input matInput formControlName="phone" />
                 @if (commonFunctionService.controlValidity(addUserForm,
@@ -89,7 +89,7 @@
             </mat-form-field>
         </div>
         <div class="row">
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>Street</mat-label>
                 <input matInput type="text"
                     formControlName="street" />
@@ -103,7 +103,7 @@
 
             </mat-form-field>
 
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>City</mat-label>
                 <input matInput type="text" formControlName="city" />
             </mat-form-field>
@@ -111,13 +111,13 @@
 
         <div class="row">
 
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>State</mat-label>
                 <input matInput type="text"
                     formControlName="state" />
             </mat-form-field>
 
-            <mat-form-field class="mb-3 col" appearance="fill">
+            <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>User Name</mat-label>
                 <input matInput type="text" formControlName="userName" />
                 @if (commonFunctionService.controlValidity(addUserForm,
@@ -132,17 +132,21 @@
         </div>
 
         <div class="row">
-            <mat-form-field class="mb-3 col-6" appearance="fill">
+            <mat-form-field class="mb-3 col-6" appearance="outline">
                 <mat-label>Role Type</mat-label>
                 <mat-select formControlName="roleId">
                     <mat-option value='1'>Admin</mat-option>
                     <mat-option value='2'>User</mat-option>
                 </mat-select>
             </mat-form-field>
-            @if (!isDialogMode || userRole!=='Admin') {
-            <mat-form-field class="mb-3 col-6" appearance="fill">
+            @if (!isDialogMode || !isAdmin) {
+            <mat-form-field class="mb-3 col-6" appearance="outline">
                 <mat-label>Password</mat-label>
-                <input matInput type="text" formControlName="password" />
+                <input matInput [type]="hide ? 'password' : 'text'"
+                    formControlName="password">
+                <mat-icon matSuffix (click)="hide = !hide">{{hide ?
+                    'visibility_off' : 'visibility'}}</mat-icon>
+
                 @if (commonFunctionService.controlValidity(addUserForm,
                 'password')) {
                 <mat-error>

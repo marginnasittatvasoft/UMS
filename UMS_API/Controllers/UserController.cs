@@ -103,7 +103,6 @@ namespace UMS_API.Controllers
         /// </summary>
         /// <param name="id">An array of user IDs to delete.</param>
         /// <returns>An IActionResult indicating the result of the delete operation.</returns>
-        [Authorize]
         [HttpDelete]
         public async Task<IActionResult> DeleteUser([FromBody] int[] id)
         {

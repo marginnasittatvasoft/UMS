@@ -19,7 +19,6 @@ import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent } from '@a
 import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal.component';
 import { TableGridComponent } from '../../../grid/table-grid/table-grid.component';
 import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 
 
@@ -33,10 +32,11 @@ import { CommonFunctionService } from '../../../../shared/commonFunction/common.
 
 export class UserComponent implements OnInit {
 
-  constructor(private userService: UserService, public dialog: MatDialog, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService) { }
+  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
   datagridConfig: TableDataGrid;
   user: User[] = [];
-  userRole: string;
+  isAdmin: boolean;
+  userId: string;
 
   ngOnInit(): void {
     this.loadUsers();
@@ -45,20 +45,20 @@ export class UserComponent implements OnInit {
 
 
   loadUsers() {
-    const idString = this.commonFunctionService.getUserId();
-    if (idString) {
-      const id = Number(idString);
+    this.userId = this.commonFunctionService.getUserId();
+    if (this.userId) {
+      const id = Number(this.userId);
       if (!isNaN(id)) {
         this.userService.getUsers(id).subscribe((data) => {
           this.user = data;
-          this.userRole = this.commonFunctionService.getUserRole();
+          this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
           this.loadTable();
         });
       } else {
-        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
       }
     } else {
-      this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+      this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
     }
   }
 
@@ -81,6 +81,8 @@ export class UserComponent implements OnInit {
       tableData: {
         showSelectColumn: true,
         userData: this.user,
+        userRole: this.commonFunctionService.getUserRole(),
+        userId: Number(this.userId),
 
       },
       headerColumn: [
@@ -129,37 +131,25 @@ export class UserComponent implements OnInit {
       actionButtons: [
         {
           icon: 'edit',
+          color: 'primary',
           callBack: (data) => {
             this.EditUserForm(data);
           }
         },
         {
           icon: 'delete',
+          color: 'warn',
           callBack: (data) => {
-            this.deleteUser(data);
+            this.deleteUser([data.id]);
           }
         },
-        {
-          icon: 'home',
-          callBack: (data) => {
-            this.deleteUser(data);
-          }
-        }
       ],
-      tableFeatures: [
-        {
-          selectField: 'deleteselectedbtn',
-          callBack: (data) => {
-            this.deleteSelectedUsers(data);
-          }
+      allDeleteFeature: {
+        callBack: (data) => {
+          this.deleteSelectedUsers(data);
         },
-        {
-          selectField: 'loaduser',
-          callBack: (data) => {
-            this.loadUsers();
-          }
-        }
-      ]
+      },
+
     }
   }
 
@@ -181,10 +171,11 @@ export class UserComponent implements OnInit {
       if (result) {
         this.userService.deleteUser(id).subscribe({
           next: () => {
+            this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500)
             this.loadUsers();
           },
           error: (error) => {
-            this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+            this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
           },
         });
       }
@@ -203,10 +194,11 @@ export class UserComponent implements OnInit {
   performDeletion(selectedUsers: number[]): void {
     this.userService.deleteUser(selectedUsers).subscribe({
       next: () => {
+        this.commonFunctionService.showSnackbar("Deleted Successfully!", 1500)
         this.loadUsers();
       },
       error: (error) => {
-        this.snackBar.open('Something is wrong!!!', 'OK', { duration: 1000 });
+        this.commonFunctionService.showSnackbar("Something is wrong!", 1500)
       }
     });
   }

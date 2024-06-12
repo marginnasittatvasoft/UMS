@@ -9,7 +9,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { LoginDto } from '../../../../../core/models/user.model';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonFunctionService } from '../../../../../shared/commonFunction/common.function.service';
 import { loginForm } from '../../models/user.form.model';
 
@@ -17,20 +16,17 @@ import { loginForm } from '../../models/user.form.model';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, FormsModule, CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, RouterLink, MatSnackBarModule],
+  imports: [MatFormFieldModule, MatInputModule, FormsModule, CommonModule, ReactiveFormsModule, MatCardModule, MatIconModule, MatButtonModule, RouterLink],
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.css'
 })
 export class LoginPageComponent {
-  constructor(private authService: AuthService, private router: Router, private snackBar: MatSnackBar, public commonFunctionService: CommonFunctionService,) {
-
-  }
-
+  constructor(private authService: AuthService, private router: Router, public commonFunctionService: CommonFunctionService,) { }
+  hide = true;
   loginForm: FormGroup<loginForm> = new FormGroup<loginForm>({
     userName: new FormControl<string>('', Validators.required),
     password: new FormControl<string>('', Validators.required)
   });
-  hide = true;
 
 
   submit() {
@@ -38,11 +34,11 @@ export class LoginPageComponent {
       const data: LoginDto = { ...this.loginForm.value } as LoginDto;
       this.authService.login(data).subscribe(result => {
         if (result.success) {
-          this.snackBar.open('Login Successful', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("Successfully LogeedIn!", 1500)
           this.commonFunctionService.setToken(result.token);
           this.router.navigate(['Ums/user'])
         } else {
-          this.snackBar.open('Invalid Credentials!!', 'OK', { duration: 1000 });
+          this.commonFunctionService.showSnackbar("Invalid Credentials!", 1500)
         }
       })
 
