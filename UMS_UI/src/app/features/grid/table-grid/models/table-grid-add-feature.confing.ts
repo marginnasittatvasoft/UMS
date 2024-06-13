@@ -1,6 +1,6 @@
-export interface TableGridAddFeature {
+export interface TableGridAddFeature<T> {
     btnText: string;
     color?: string;
     isVisible?: boolean;
-    callBack(data: any): void;
+    callBack(data: T): void;
 }

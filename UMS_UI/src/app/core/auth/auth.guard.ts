@@ -2,13 +2,15 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  let subscription: Subscription;
 
   return new Promise<boolean>((resolve) => {
-    authService.isLoggedIn.pipe(take(1)).subscribe({
+    subscription = authService.isLoggedIn.pipe(take(1)).subscribe({
       next: (isLoggedIn) => {
         if (isLoggedIn) {
           resolve(true);
@@ -20,5 +22,9 @@ export const authGuard: CanActivateFn = (route, state) => {
         router.navigate(['/login']).then(() => resolve(false));
       }
     });
+  }).finally(() => {
+    if (subscription) {
+      subscription.unsubscribe();
+    }
   });
 };

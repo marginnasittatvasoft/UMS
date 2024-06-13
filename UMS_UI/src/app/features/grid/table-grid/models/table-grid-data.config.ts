@@ -1,11 +1,9 @@
 import { User } from "../../../users/models/user.model";
 
-export interface TableGridDataConfig {
+export interface TableGridDataConfig<T> {
     showSelectColumn?: boolean;
-    tableData?: User[];
-    userRole?: string;
-    userId?: number;
-    callBackById?: ((data: any) => boolean);
-    callBackByIcon?: ((data: any) => boolean);
-    callBackByRole?: ((data: any) => void);
+    tableData?: T[];
+    isVisibleFeatureByRole?: boolean;
+    callBackById?: ((data: T) => boolean);
+    callBackByIcon?: ((data:any) => boolean);
 }

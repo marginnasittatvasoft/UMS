@@ -36,7 +36,7 @@ export class LoginPageComponent {
         if (result.success) {
           this.commonFunctionService.showSnackbar("Successfully LogeedIn!", 1500)
           this.commonFunctionService.setToken(result.token);
-          this.router.navigate(['Ums/user'])
+          this.router.navigate(['Ums/home'])
         } else {
           this.commonFunctionService.showSnackbar("Invalid Credentials!", 1500)
         }

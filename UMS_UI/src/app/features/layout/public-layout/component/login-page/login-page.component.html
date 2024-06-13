@@ -1,4 +1,4 @@
-<div class="container d-flex justify-content-center align-items-center"
+<!-- <div class="container d-flex justify-content-center align-items-center"
     style="height: 80vh;">
     <mat-card class="my-3 align-content-center text-center card w-50 shadow">
         <mat-card-content>
@@ -33,9 +33,47 @@
                 <button mat-raised-button color="primary" (click)="submit()"
                     type="submit">Login</button>
             </form>
-            <!-- <div class="mt-2">
-                <a routerLink="/forgotpassword">Forgot password?</a>
-            </div> -->
+           
+        </mat-card-content>
+    </mat-card>
+</div> -->
+
+<div class="container-fluid d-flex justify-content-center align-items-center"
+    style="height: 93vh; background-color: #f0f0f0;">
+    <mat-card class="p-4 rounded shadow-lg"
+        style="width: 400px; background-color: #ffffff;">
+        <mat-card-content class="text-center">
+            <h1 class="mb-4"
+                style="color: #062749; font-size: 1.5rem;">Sign
+                In</h1>
+            <form [formGroup]="loginForm" class="d-flex flex-column">
+                <mat-form-field class="mb-3" appearance="outline">
+                    <mat-label>Username</mat-label>
+                    <input matInput formControlName="userName">
+                    <mat-error
+                        *ngIf="commonFunctionService.controlValidity(loginForm, 'userName')">
+                        {{ commonFunctionService.getErrorMessage(loginForm,
+                        'userName', 'Username') }}
+                    </mat-error>
+                </mat-form-field>
+                <mat-form-field class="mb-3" appearance="outline">
+                    <mat-label>Password</mat-label>
+                    <input matInput [type]="hide ? 'password' : 'text'"
+                        formControlName="password">
+                    <mat-icon matSuffix (click)="hide = !hide">
+                        {{ hide ? 'visibility_off' : 'visibility' }}
+                    </mat-icon>
+                    <mat-error
+                        *ngIf="commonFunctionService.controlValidity(loginForm, 'password')">
+                        {{ commonFunctionService.getErrorMessage(loginForm,
+                        'password', 'Password') }}
+                    </mat-error>
+                </mat-form-field>
+                <button mat-raised-button color="primary" (click)="submit()"
+                    style="background-color: #062749; font-size: 1.1rem; height: 40px;">
+                    Log In
+                </button>
+            </form>
         </mat-card-content>
     </mat-card>
 </div>

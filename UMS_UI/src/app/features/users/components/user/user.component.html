@@ -1,8 +1,10 @@
 <div class="container mt-3">
-    <div class="d-flex justify-content-between">
+    <div class="d-flex justify-content-between mb-4">
         <h1 *ngIf="isAdmin">Users List</h1>
         <h1 *ngIf="!isAdmin">User</h1>
-
+        <a mat-button routerLink="/Ums/home">
+            <mat-icon>arrow_back</mat-icon> Back
+        </a>
     </div>
     <div>
         <app-table-grid [config]="datagridConfig"></app-table-grid>

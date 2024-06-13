@@ -1,0 +1,35 @@
+.background-image {
+    bottom: 0;
+    width: 40%;
+}
+
+.user-button {
+    font-size: 1.1rem;
+    padding: 12px 30px;
+    border-radius: 20px;
+    color: #062749;
+    border-color: #062749;
+}
+
+.user-button:hover {
+    background-color: #062749;
+    color: white;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.heading {
+    color: #062749;
+    font-size: 2rem;
+}
+
+.paragraph {
+    font-size: 1.3rem;
+    color: #e7c501;
+}

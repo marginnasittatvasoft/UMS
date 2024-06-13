@@ -8,7 +8,6 @@ using Serilog.Events;
 using System.IO;
 using System.Text;
 using UMS_API.Extensions;
-using UMS_BusinessLogic.CommonRepository;
 using UMS_BusinessLogic.Repositories.Interfaces;
 using UMS_BusinessLogic.Repositories.Repos;
 using UMS_BusinessLogic.Services.Interfaces;
@@ -27,9 +26,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("UmsConnection")));
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepositories, UserRepositories>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped(typeof(ICommonRepository<>), typeof(CommonRepository<>));
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 
 

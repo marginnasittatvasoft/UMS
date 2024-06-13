@@ -1,6 +1,6 @@
 import { SortDirection } from "@angular/material/sort";
 
-export interface TableGridSortingConfig {
+export interface TableGridSortingConfig<T> {
     defaultSortingOrder?: SortDirection;
     sortDisableClear?: boolean;
     defaultSortActiveColumn?: string;

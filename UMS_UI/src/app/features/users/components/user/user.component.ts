@@ -36,7 +36,7 @@ export class UserComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription = new Subscription();
 
   constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService, public router: Router) { }
-  datagridConfig: TableDataGrid;
+  datagridConfig: TableDataGrid<User>;
   user: User[] = [];
   isAdmin: boolean;
   userId: string;
@@ -82,7 +82,8 @@ export class UserComponent implements OnInit, OnDestroy {
         pageSizeOption: [5, 10, 15],
         isShowFirstLastButton: true,
         isHidePageSizeOption: false,
-        isDisabledPagination: false
+        isDisabledPagination: false,
+        isShowPagination: this.commonFunctionService.getUserRole() === 'Admin'
       },
       sorting: {
         disabledSorting: false,
@@ -91,10 +92,9 @@ export class UserComponent implements OnInit, OnDestroy {
         defaultSortingOrder: 'desc'
       },
       tableGridData: {
-        showSelectColumn: true,
+        showSelectColumn: this.commonFunctionService.getUserRole() === 'Admin',
         tableData: this.user,
-        userRole: this.commonFunctionService.getUserRole(),
-        userId: Number(this.userId),
+        isVisibleFeatureByRole: this.commonFunctionService.getUserRole() === 'Admin',
         callBackById: (data) => {
           const isDisabledByid = data.id === Number(this.userId)
           return isDisabledByid;
@@ -159,13 +159,17 @@ export class UserComponent implements OnInit, OnDestroy {
           icon: 'delete',
           color: 'warn',
           callBack: (data) => {
+            debugger;
             this.deleteUser([data.id]);
           }
         },
       ],
       allDeleteFeature: {
+
         callBack: (data) => {
-          this.deleteSelectedUsers(data);
+          debugger;
+          const selectedIds = data.map(item => item.id);
+          this.deleteSelectedUsers(selectedIds);
         },
       },
       addFetures: [{

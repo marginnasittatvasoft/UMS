@@ -31,12 +31,14 @@ export class NavbarComponent {
     this.userRole = this.commonFunctionService.getUserRole();
     if (this.isLoggedIn && this.userRole === "Admin") {
       return [
+        { label: 'Home', route: '/Ums/home' },
         { label: 'User', route: '/Ums/user' },
         { label: 'Add_User', route: '/Ums/adduser' }
       ];
     }
     else if (this.isLoggedIn && this.userRole !== "Admin") {
       return [
+        { label: 'Home', route: '/Ums/home' },
         { label: 'User', route: '/Ums/user' },
       ];
     }

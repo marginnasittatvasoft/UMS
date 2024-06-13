@@ -26,26 +26,22 @@ import { CommonFunctionService } from '../../../shared/commonFunction/common.fun
   styleUrl: './table-grid.component.css'
 })
 
-export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
+export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
 
-  @Input() config: TableDataGrid;
+  @Input() config: TableDataGrid<T>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
   displayedColumns: string[] = [];
-  dataSource: MatTableDataSource<User>;
-  selection = new SelectionModel<any>(true, []);
+  dataSource: MatTableDataSource<T>;
+  selection = new SelectionModel<T>(true, []);
   addAnotherColumn: string[];
   defaultSortColumn: string;
   selectedSortColumns: string[] = [];
   filterDataColumn: string[] = [];
   isHeaderSelected: boolean = false;
   defalutPageSize: number;
-  userRole: string;
-  isAdmin: boolean;
-  userId: number;
-
 
   ngOnInit() {
     this.initializeTable();
@@ -65,11 +61,10 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   initializeTable() {
     if (this.config) {
       this.displayedColumns = this.config.headerColumn.map(i => i.columnName);
-      this.isAdmin = this.config.tableGridData.userRole === 'Admin';
       this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
-      this.dataSource = new MatTableDataSource(this.config.tableGridData.tableData);
+      this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
       this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.tableGridData.showSelectColumn && this.config.allDeleteFeature.callBack && this.isAdmin) {
+      if (this.config.tableGridData.showSelectColumn && this.config.allDeleteFeature.callBack) {
         this.addAnotherColumn.unshift('select');
       }
       if (this.config.actionButtons.length > 0) {
@@ -103,7 +98,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   applyFilter(event: Event, columns: string[]) {
     const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.filter = filterValue;
-    this.dataSource.filterPredicate = (data: User, filter: string) => {
+    this.dataSource.filterPredicate = (data: T, filter: string) => {
       return columns.some(column => {
         return data[column].toLowerCase().includes(filter);
       });
@@ -112,7 +107,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
 
   isAllSelected() {
     const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.filter(user => user.id !== this.userId).length;
+    const numRows = this.dataSource.data.filter(data => !this.isDisabledById(data)).length;
     return numSelected === numRows;
   }
 
@@ -121,14 +116,15 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
       this.selection.clear();
       return;
     }
-    this.selection.select(...this.dataSource.data.filter(user => user.id !== this.userId));
+    this.selection.select(...this.dataSource.data.filter(data => !this.isDisabledById(data)));
   }
 
   deleteSelectedData(): void {
+    debugger;
     const deleteSelectedIds = this.config.allDeleteFeature;
     if (this.config && deleteSelectedIds) {
       if (deleteSelectedIds.callBack) {
-        const selectedIds = this.selection.selected.map(item => item.id);
+        const selectedIds = this.selection.selected.map(item => item);
         deleteSelectedIds.callBack(selectedIds);
         this.selection.clear();
         this.isHeaderSelected = false;
@@ -140,7 +136,7 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
     return this.dataSource.filteredData.length === 0 || this.dataSource.data.length === 0;
   }
 
-  isCheckBoxOrButttonDisabledById(data: any): boolean {
+  isDisabledById(data: any): boolean {
     if (this.config && this.config.tableGridData && this.config.tableGridData.callBackById) {
       return this.config.tableGridData.callBackById(data);
     }
@@ -155,12 +151,15 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get showFilterOption() {
-    if (!this.isAdmin) {
-      return false;
+    if (this.config.tableGridData.isVisibleFeatureByRole) {
+      return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
     }
-    return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
+    return false;
   }
 
+  get showPagination() {
+    return this.config.pagination.isShowPagination ?? false;
+  }
   get pageSize() {
     return this.defalutPageSize ?? this.config.pagination?.defaultPageSize ?? 5;
   }
@@ -182,10 +181,11 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get disabledSorting() {
-    if (!this.isAdmin) {
-      return true;
+    if (this.config.tableGridData.isVisibleFeatureByRole) {
+      return this.config.sorting?.disabledSorting ?? false;
     }
-    return this.config.sorting?.disabledSorting ?? false;
+    return true;
+
   }
 
   get sortActiveColumn() {
@@ -197,10 +197,10 @@ export class TableGridComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   get sortDirection() {
-    if (!this.isAdmin) {
-      return '';
+    if (this.config.tableGridData.isVisibleFeatureByRole) {
+      return this.config.sorting?.defaultSortingOrder ?? 'asc';
     }
-    return this.config.sorting?.defaultSortingOrder ?? 'asc';
+    return '';
   }
 
 }

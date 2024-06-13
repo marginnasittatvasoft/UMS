@@ -14,15 +14,17 @@ namespace UMS_API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly IAuthService _authService;
         private readonly ILogger<UserController> _logger;
         private readonly IJwtService _jwtService;
 
-        public AuthController(IMapper mapper, IUserService userService, ILogger<UserController> logger, IJwtService jwtService)
+        public AuthController(IMapper mapper, IUserService userService, ILogger<UserController> logger, IJwtService jwtService, IAuthService authService)
         {
             _mapper = mapper;
             _userService = userService;
             _logger = logger;
             _jwtService = jwtService;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -31,7 +33,7 @@ namespace UMS_API.Controllers
             ApiResponseDto<string> response = new ApiResponseDto<string>();
             if (loginDto != null)
             {
-                bool isAuthenticated = await _userService.Authenticate(loginDto.UserName, loginDto.Password);
+                bool isAuthenticated = await _authService.Authenticate(loginDto.UserName, loginDto.Password);
                 
 
                 if (isAuthenticated)

@@ -32,7 +32,7 @@
             </th>
             <td mat-cell *matCellDef="let data">
                 <mat-checkbox
-                    [disabled]="isCheckBoxOrButttonDisabledById(data)"
+                    [disabled]="isDisabledById(data)"
                     (click)="$event.stopPropagation()"
                     (change)="$event ? selection.toggle(data) : null"
                     [checked]="selection.isSelected(data)">
@@ -58,7 +58,7 @@
             <td mat-cell *matCellDef="let data">
                 <ng-container *ngFor="let button of this.config.actionButtons">
                     <button
-                        [disabled]="isCheckBoxOrButttonDisabledById(data) && isButttonDisabledByIcon(button)"
+                        [disabled]="isDisabledById(data) && isButttonDisabledByIcon(button)"
                         mat-icon-button
                         [color]="button.color"
                         (click)="button.callBack(data)">
@@ -78,7 +78,7 @@
         </div>
     </ng-container>
     <mat-paginator
-        *ngIf="isAdmin"
+        *ngIf="showPagination"
         [hidden]="isNoDataFound()"
         [pageSizeOptions]="pageSizeOptions ? pageSizeOptions : []"
         [pageSize]="pageSize" [showFirstLastButtons]="showFirstLastButtons"

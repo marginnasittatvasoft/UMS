@@ -6,12 +6,12 @@ import { TableGridPaginatorConfig } from "./table-grid-paginator.config";
 import { TableGridSortingConfig } from "./table-grid-sorting.config";
 import { TableGridAddFeature } from "./table-grid-add-feature.confing";
 
-export interface TableDataGrid {
-    pagination?: TableGridPaginatorConfig;
-    sorting?: TableGridSortingConfig;
-    tableGridData: TableGridDataConfig;
-    actionButtons?: TableActionButton[];
-    allDeleteFeature?: TableGridAllDeleteFeature;
-    headerColumn?: TableGridColumnHeaderConfig[];
-    addFetures?: TableGridAddFeature[];
+export interface TableDataGrid<T> {
+    pagination?: TableGridPaginatorConfig<T>;
+    sorting?: TableGridSortingConfig<T>;
+    tableGridData: TableGridDataConfig<T>;
+    actionButtons?: TableActionButton<T>[];
+    allDeleteFeature?: TableGridAllDeleteFeature<T>;
+    headerColumn?: TableGridColumnHeaderConfig<T>[];
+    addFetures?: TableGridAddFeature<T>[];
 }

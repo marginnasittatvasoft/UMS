@@ -17,6 +17,10 @@ export const SecureRoutes: Routes = [
         canActivate: [authGuard],
         children: [
             {
+                path: 'home',
+                loadComponent: () => import('../../../../features/layout/secure-layout/component/main-page/main-page.component').then(m => m.MainPageComponent)
+            },
+            {
                 path: 'user',
                 loadComponent: () => import('../../../users/components/user/user.component').then(m => m.UserComponent)
             },
