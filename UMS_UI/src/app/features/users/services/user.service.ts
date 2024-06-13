@@ -21,17 +21,11 @@ export class UserService {
   }
 
   addUser(user: User): Observable<void> {
-    return this.http.post<void>(this.baseUrl + endPoint.Users, user)
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.http.post<void>(this.baseUrl + endPoint.Users, user);
   }
 
   updateUser(user: User): Observable<void> {
-    return this.http.put<void>(this.baseUrl + endPoint.Users + user.id, user)
-      .pipe(
-        catchError(this.handleError)
-      );
+    return this.http.put<void>(this.baseUrl + endPoint.Users + user.id, user);
   }
 
   deleteUser(ids: number[]): Observable<void> {

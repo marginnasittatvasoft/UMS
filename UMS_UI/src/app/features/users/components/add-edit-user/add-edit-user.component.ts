@@ -91,8 +91,10 @@ export class AddEditUserComponent implements OnDestroy {
         this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
+        debugger;
         if (error.status === 409) {
           this.commonFunctionService.showSnackbar("User already exists!", 1500);
+          this.addUserForm.patchValue({ email: '' });
           this.addUserForm.patchValue({ userName: '' });
         } else {
           this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
@@ -110,6 +112,7 @@ export class AddEditUserComponent implements OnDestroy {
       error: (error) => {
         if (error.status === 409) {
           this.commonFunctionService.showSnackbar("User already exists!", 1500);
+          this.addUserForm.patchValue({ email: '' });
           this.addUserForm.patchValue({ userName: '' });
         } else {
           this.commonFunctionService.showSnackbar("Something is wrong!", 1500);

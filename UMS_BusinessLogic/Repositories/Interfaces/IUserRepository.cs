@@ -14,9 +14,8 @@ namespace UMS_BusinessLogic.Repositories.Interfaces
 
         Task<User> GetUserByUsername(string username);
 
-        bool IsAdmin(int id);
-
         Task<User> GetUserById(int id);
+
         Task<List<User>> GetMutipleUsers(int id);
 
         Task<User> AddUser(User entity);
