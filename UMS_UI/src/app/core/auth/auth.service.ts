@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { API_BASE_URL, endPoint } from '../../shared/endpoints/endpoints.const';
+import { endPoint } from '../../shared/endpoints/endpoints.const';
 import { LoginDto } from '../models/user.model';
 import { ApiResponseDTO } from '../models/apiresponse.model';
 import { Router } from '@angular/router';
@@ -10,7 +10,6 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly baseUrl = API_BASE_URL;
   private isLoggedInSubject: BehaviorSubject<boolean>;
 
   constructor(private http: HttpClient, private router: Router) {
@@ -33,7 +32,7 @@ export class AuthService {
   }
 
   login(loginDto: LoginDto): Observable<ApiResponseDTO<string>> {
-    return this.http.post<ApiResponseDTO<string>>(this.baseUrl + endPoint.Authentication, loginDto)
+    return this.http.post<ApiResponseDTO<string>>(endPoint.Authentication, loginDto)
       .pipe(
         tap(response => {
           const isLoggedIn = response.success;
