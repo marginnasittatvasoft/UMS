@@ -21,7 +21,7 @@ import { loginForm } from '../../models/user.form.model';
   styleUrl: './login-page.component.css'
 })
 export class LoginPageComponent {
-  constructor(private authService: AuthService, private router: Router, public commonFunctionService: CommonFunctionService,) { }
+  constructor(private authService: AuthService, private router: Router, public commonFunctionService: CommonFunctionService) { }
   hide = true;
   loginForm: FormGroup<loginForm> = new FormGroup<loginForm>({
     userName: new FormControl<string>('', Validators.required),

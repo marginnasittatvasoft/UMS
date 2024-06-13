@@ -24,5 +24,7 @@ namespace UMS_BusinessLogic.Repositories.Interfaces
 
         Task<bool> DeleteUser(int[] id);
 
+       
+
     }
 }

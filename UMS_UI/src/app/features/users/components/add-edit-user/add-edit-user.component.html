@@ -135,8 +135,10 @@
             <mat-form-field class="mb-3 col-6" appearance="outline">
                 <mat-label>Role Type</mat-label>
                 <mat-select formControlName="roleId">
-                    <mat-option value='1'>Admin</mat-option>
-                    <mat-option value='2'>User</mat-option>
+                    <mat-option *ngFor="let role of userRoles"
+                        [value]="role.id">
+                        {{ role.role }}
+                    </mat-option>
                 </mat-select>
             </mat-form-field>
             @if (!isDialogMode || !isAdmin) {

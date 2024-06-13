@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -63,6 +64,10 @@ export class CommonFunctionService {
         }
     }
 
+    handleError(error: any): Observable<never> {
+        this.snackBar.open("Something is Wrong!", 'OK', { duration: 1500 });
+        throw error;
+    }
     setToken(tokenValue: string) {
         localStorage.setItem('token', tokenValue)
     }

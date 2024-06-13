@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { User } from '../models/user.model';
+import { AspNetRoles, User } from '../models/user.model';
 import { Observable, catchError, forkJoin } from 'rxjs';
 import { endPoint } from '../../../shared/endpoints/endpoints.const';
 import { CommonFunctionService } from '../../../shared/commonFunction/common.function.service';
@@ -12,10 +12,17 @@ export class UserService {
 
   constructor(private http: HttpClient, public commonFunctionService: CommonFunctionService) { }
 
-  getUsers = (id: number): Observable<User[]> => {
+  getUsers(id: number): Observable<User[]> {
     return this.http.get<User[]>(endPoint.AllUsers + id)
       .pipe(
-        catchError(this.handleError)
+        catchError(this.commonFunctionService.handleError)
+      );
+  }
+
+  getRoles(): Observable<AspNetRoles[]> {
+    return this.http.get<AspNetRoles[]>(endPoint.AllRoles)
+      .pipe(
+        catchError(this.commonFunctionService.handleError)
       );
   }
 
@@ -30,13 +37,9 @@ export class UserService {
   deleteUser(ids: number[]): Observable<void> {
     return this.http.delete<void>(endPoint.User, { body: ids })
       .pipe(
-        catchError(this.handleError)
+        catchError(this.commonFunctionService.handleError)
       );
   }
 
-  private handleError(error: any): Observable<never> {
-    this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
-    throw error;
-  }
 
 }

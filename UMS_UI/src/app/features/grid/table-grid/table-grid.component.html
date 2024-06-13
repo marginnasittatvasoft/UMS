@@ -4,7 +4,7 @@
         <input matInput (keyup)="applyFilter($event,filterDataColumn)"
             placeholder="Search">
     </mat-form-field>
-    <ng-container *ngFor="let button of this.config.addFetures">
+    <ng-container *ngFor="let button of this.config.addButton">
         <button mat-raised-button [color]="button.color"
             *ngIf="button.isVisible" (click)="button.callBack(null)"
             class="ms-3">{{button.btnText}}</button>

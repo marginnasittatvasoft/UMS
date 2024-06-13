@@ -1,3 +1,3 @@
-export interface TableGridAllDeleteFeature<T> {
-    callBack(data: any): void;
+export interface TableGridMultipleDelete<T> {
+    callBack(data: T[]): void;
 }

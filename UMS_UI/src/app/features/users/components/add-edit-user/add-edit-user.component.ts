@@ -13,6 +13,7 @@ import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 import { Subscription } from 'rxjs';
+import { AspNetRoles } from '../../models/user.model';
 
 
 @Component({
@@ -24,48 +25,57 @@ import { Subscription } from 'rxjs';
 })
 export class AddEditUserComponent implements OnDestroy {
   addUserForm!: FormGroup;
+  userRoles: AspNetRoles[] = [];
   isDialogMode: boolean = false;
+  isDisabledField: boolean;
   isAdmin: boolean;
+  userId: number;
   hide = true;
   private subscriptions: Subscription = new Subscription();
 
 
-  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router) {
-  }
+  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router) { }
 
   ngOnInit(): void {
+    debugger;
     this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
+    this.isDisabledField = Number(this.commonFunctionService.getUserId()) === this.data.user.id;
     this.isDialogMode = !!this.data;
     this.createForm();
+    this.loadAspNetUserRoles();
     if (this.isDialogMode && this.data && this.data.user) {
       const userData = this.data.user;
       this.addUserForm.patchValue(userData);
-      const roleId = userData.roleId;
-      if (roleId) {
-        const userType = roleId === 1 ? '1' : '2';
-        this.addUserForm.get('roleId').patchValue(userType);
-      }
     }
   }
+
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
   createForm() {
+
+    debugger;
     this.addUserForm = this.formbuilder.group({
       id: ['', []],
       firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
-      email: [{ value: '', disabled: !this.isAdmin }, [Validators.required, Validators.email]],
+      email: [{ value: '', disabled: (this.isDisabledField) }, [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern("[0-9 ]{10}")]],
       street: ['', [Validators.required, Validators.maxLength(150), Validators.minLength(2)]],
       city: ['', []],
       state: ['', []],
-      userName: [{ value: '', disabled: !this.isAdmin }, [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
+      userName: [{ value: '', disabled: (this.isDisabledField) }, [Validators.required, Validators.maxLength(20), Validators.minLength(5)]],
       password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+\-]).{6,16}$/)]],
       roleId: ['', [Validators.required]],
     });
   }
-
+  loadAspNetUserRoles() {
+    const loadRolesSub = this.userService.getRoles().subscribe((data) => {
+      this.userRoles = data;
+    });
+    this.subscriptions.add(loadRolesSub);
+  }
 
   onSubmit() {
     if (this.addUserForm.valid) {

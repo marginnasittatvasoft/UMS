@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using UMS_BusinessLogic.Services.Interfaces;
 using UMS_DataAccess.Dto;
+using UMS_DataAccess.Models;
 
 namespace UMS_API.Controllers
 {
@@ -38,23 +39,20 @@ namespace UMS_API.Controllers
 
                 if (isAuthenticated)
                 {
-                    var userRoles = await _userService.GetUserRoles(loginDto.UserName);
+                    User user = await _userService.GetUserByUsername(loginDto.UserName);
 
-                    int? role = userRoles.RoleId;
-                    string roles = role switch
+                    if(user!=null)
                     {
-                        1 => "Admin",
-                        2 => "User",
-                        _ => "User"
-                    };
+                        AspNetRole? aspNetRole = await _userService.GetRoleNameById(user.RoleId);
 
-                    var token = _jwtService.GetJwtToken(loginDto.UserName,roles);
-                    response.success = true;
-                    response.message = "Login Successfull";
-                    response.token = token;
-                    response.role = roles;
-                    response.id = userRoles.Id;
-                    return Ok(response);
+                        var token = _jwtService.GetJwtToken(loginDto.UserName, aspNetRole.Role);
+                        response.success = true;
+                        response.message = "Login Successfull";
+                        response.token = token;
+                        response.role = aspNetRole.Role;
+                        response.id = user.Id;
+                        return Ok(response);
+                    }
                 }
                 else
                 {

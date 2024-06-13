@@ -64,7 +64,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
       this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
       this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
       this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.tableGridData.showSelectColumn && this.config.allDeleteFeature.callBack) {
+      if (this.config.tableGridData.showSelectColumn && this.config.multipleDelete.callBack) {
         this.addAnotherColumn.unshift('select');
       }
       if (this.config.actionButtons.length > 0) {
@@ -120,12 +120,11 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   deleteSelectedData(): void {
-    debugger;
-    const deleteSelectedIds = this.config.allDeleteFeature;
+    const deleteSelectedIds = this.config.multipleDelete;
     if (this.config && deleteSelectedIds) {
       if (deleteSelectedIds.callBack) {
-        const selectedIds = this.selection.selected.map(item => item);
-        deleteSelectedIds.callBack(selectedIds);
+        const selectedData = this.selection.selected.map(item => item);
+        deleteSelectedIds.callBack(selectedData);
         this.selection.clear();
         this.isHeaderSelected = false;
       }

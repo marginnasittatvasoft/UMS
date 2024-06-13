@@ -45,6 +45,23 @@ namespace UMS_BusinessLogic.Repositories.Repos
         }
 
         /// <summary>
+        /// Retrieves all entities of type T asynchronously.
+        /// </summary>
+        /// <returns>A collection of all entities of type T.</returns>
+        public async Task<List<T>> GetAll()
+        {
+            try
+            {
+                return await _dbSet.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error in Retrieve all the data: ", ex.ToString());
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Retrieves entities of type T that match the specified predicate asynchronously.
         /// </summary>
         /// <param name="predicate">The condition to filter entities.</param>

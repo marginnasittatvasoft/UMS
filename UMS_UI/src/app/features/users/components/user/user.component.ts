@@ -85,12 +85,14 @@ export class UserComponent implements OnInit, OnDestroy {
         isDisabledPagination: false,
         isShowPagination: this.commonFunctionService.getUserRole() === 'Admin'
       },
+
       sorting: {
         disabledSorting: false,
         defaultSortActiveColumn: 'userName',
         sortDisableClear: true,
         defaultSortingOrder: 'desc'
       },
+
       tableGridData: {
         showSelectColumn: this.commonFunctionService.getUserRole() === 'Admin',
         tableData: this.user,
@@ -104,6 +106,7 @@ export class UserComponent implements OnInit, OnDestroy {
           return isDisabledByIcon;
         },
       },
+
       headerColumn: [
         {
           columnName: 'userName',
@@ -147,6 +150,7 @@ export class UserComponent implements OnInit, OnDestroy {
         },
 
       ],
+
       actionButtons: [
         {
           icon: 'edit',
@@ -159,20 +163,19 @@ export class UserComponent implements OnInit, OnDestroy {
           icon: 'delete',
           color: 'warn',
           callBack: (data) => {
-            debugger;
             this.deleteUser([data.id]);
           }
         },
       ],
-      allDeleteFeature: {
 
+      multipleDelete: {
         callBack: (data) => {
-          debugger;
           const selectedIds = data.map(item => item.id);
           this.deleteSelectedUsers(selectedIds);
         },
       },
-      addFetures: [{
+
+      addButton: [{
         btnText: "Add User",
         color: 'primary',
         isVisible: this.isAdmin,
@@ -184,13 +187,13 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   checkUserid(id: number) {
-    debugger;
     return id === Number(this.userId);
   }
 
   navigatePath() {
     this.router.navigate(["/Ums/adduser"]);
   }
+
   EditUserForm(user: User) {
     const dialogRef = this.dialog.open(AddEditUserComponent, {
       data: {

@@ -12,7 +12,7 @@ namespace UMS_BusinessLogic.Services.Interfaces
         #region GetUsersData
         Task<User> GetUserById(int id);
         Task<List<User>> GetUsers(int id);
-        Task<User> GetUserRoles(string username);
+        Task<User> GetUserByUsername(string username);
         
         #endregion
 
@@ -22,5 +22,11 @@ namespace UMS_BusinessLogic.Services.Interfaces
         Task<bool> DeleteUser(int[] id);
         #endregion
 
+        #region AspNetRolesData
+
+        Task<AspNetRole> GetRoleNameById(int id);
+        Task<List<AspNetRole>> GetAllRoles();
+
+        #endregion
     }
 }

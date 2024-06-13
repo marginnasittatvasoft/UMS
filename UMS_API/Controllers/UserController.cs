@@ -40,11 +40,22 @@ namespace UMS_API.Controllers
 
 
         /// <summary>
+        /// Retrieves a list of Roles.
+        /// </summary>
+        /// <returns>An IActionResult containing the list of users.</returns>
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetAllRoles()
+        {
+            var roles = await _userService.GetAllRoles();
+            return Ok(roles);
+        }
+
+        /// <summary>
         /// Creates a new user.
         /// </summary>
         /// <param name="userDto">The UserDto object containing user details.</param>
         /// <returns>An IActionResult containing the created user.</returns>
-        
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateUser(UserDto userDto)

@@ -10,6 +10,7 @@ namespace UMS_BusinessLogic.Repositories.Interfaces
     public interface IBaseRepository<T> where T : class
     {
         Task<T> GetById(int id);
+        Task<List<T>> GetAll();
         Task<IEnumerable<T>> Find(Expression<Func<T, bool>> predicate);
         Task<T> Add(T entity);
         Task<T> Update(T entity);

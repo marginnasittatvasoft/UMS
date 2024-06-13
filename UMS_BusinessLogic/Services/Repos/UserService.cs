@@ -18,13 +18,15 @@ namespace UMS_BusinessLogic.Services.Repos
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
+        private readonly IAspNetRoleRepository _aspNetRoleRepository;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(IMapper mapper, IUserRepository userRepository, ILogger<UserService> logger)
+        public UserService(IMapper mapper, IUserRepository userRepository, ILogger<UserService> logger, IAspNetRoleRepository aspNetRoleRepository)
         {
             _mapper = mapper;
             _userRepository = userRepository;
             _logger = logger;
+            _aspNetRoleRepository = aspNetRoleRepository;
         }
 
         #region User Existence
@@ -94,7 +96,7 @@ namespace UMS_BusinessLogic.Services.Repos
         /// </summary>
         /// <param name="username">The username of the user to retrieve.</param>
         /// <returns>The user object including their roles if found; otherwise, null.</returns>
-        public async Task<User> GetUserRoles(string username)
+        public async Task<User> GetUserByUsername(string username)
         {
             try
             {
@@ -165,6 +167,34 @@ namespace UMS_BusinessLogic.Services.Repos
                 return await _userRepository.DeleteUser(ids);
             }
             catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region AspNetRolesData
+        public async Task<AspNetRole> GetRoleNameById(int id)
+        {
+            try
+            {
+                return await _aspNetRoleRepository.GetRoleById(id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.ToString());
+                throw;
+            }
+        }
+
+        public async Task<List<AspNetRole>> GetAllRoles() {
+            try
+            {
+                return await _aspNetRoleRepository.GetAllRoles();
+            }
+            catch(Exception ex)
             {
                 _logger.LogError(ex.ToString());
                 throw;

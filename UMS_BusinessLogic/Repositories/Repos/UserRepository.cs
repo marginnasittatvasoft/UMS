@@ -13,20 +13,20 @@ using UMS_DataAccess.Models;
 
 namespace UMS_BusinessLogic.Repositories.Repos
 {
-    public class UserRepository :IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _userDbContext;
         private readonly IBaseRepository<User> _baseRepository;
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(ApplicationDbContext userDbContext,ILogger<UserRepository> logger, IBaseRepository<User> baseRepository) 
+        public UserRepository(ApplicationDbContext userDbContext, ILogger<UserRepository> logger, IBaseRepository<User> baseRepository)
         {
             _userDbContext = userDbContext;
             _baseRepository = baseRepository;
             _baseRepository = baseRepository;
             _logger = logger;
         }
-    
+
         #region User Existence
 
         /// <summary>
@@ -54,6 +54,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
 
         #endregion
 
+
         #region Get User Methods
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
                 var user = await _userDbContext.Users.FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
                 if (user == null)
                 {
-                    _logger.LogError("User with username {username} not found", username);
+                    _logger.LogError($"User with username {username} not found");
                 }
                 return user;
             }
@@ -160,5 +161,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
 
         #endregion
 
+
+       
     }
 }

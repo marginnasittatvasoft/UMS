@@ -1,4 +1,4 @@
-export interface TableGridAddFeature<T> {
+export interface TableGridAddButtton<T> {
     btnText: string;
     color?: string;
     isVisible?: boolean;

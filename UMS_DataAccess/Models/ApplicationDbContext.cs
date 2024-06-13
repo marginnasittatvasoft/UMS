@@ -15,5 +15,9 @@ namespace UMS_DataAccess.Models
         }
 
         public DbSet<User> Users { get; set; }
+
+        public DbSet<AspNetRole> AspNetRoles { get; set; }
+
+
     }
 }

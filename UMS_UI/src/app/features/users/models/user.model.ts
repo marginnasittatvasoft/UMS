@@ -11,3 +11,8 @@ export interface User {
     password: string;
     roleId: number;
 }
+
+export interface AspNetRoles {
+    id: number;
+    role: string;
+}
