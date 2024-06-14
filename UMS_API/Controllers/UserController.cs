@@ -32,11 +32,17 @@ namespace UMS_API.Controllers
         /// <returns>An IActionResult containing the list of users.</returns>
         [Authorize]
         [HttpGet("all/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<UserDto>))]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUsers(int id)
         {
-            var user = await _userService.GetUsers(id);
+            List<User> user = await _userService.GetUsers(id);
             return Ok(user);
         }
+
 
 
         /// <summary>
@@ -44,11 +50,15 @@ namespace UMS_API.Controllers
         /// </summary>
         /// <returns>An IActionResult containing the list of users.</returns>
         [HttpGet("roles")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<AspNetRole>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllRoles()
         {
-            var roles = await _userService.GetAllRoles();
+            List<AspNetRole> roles = await _userService.GetAllRoles();
             return Ok(roles);
         }
+
+
 
         /// <summary>
         /// Creates a new user.
@@ -58,25 +68,39 @@ namespace UMS_API.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateUser(UserDto userDto)
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(UserDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
         {
-            if (userDto != null)
+            if (userDto == null)
             {
-                bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, 0);
-
-                if (usernameExists)
-                {
-                    return Conflict("Username already exists");
-                }
-
-                var user = _mapper.Map<User>(userDto);
-                var addUser = await _userService.AddUser(user);
-                var response = _mapper.Map<UserDto>(addUser);
-                return Ok(response);
+                return BadRequest("User data is required.");
             }
 
-            return NotFound();
+            if (!ModelState.IsValid)
+            {
+                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, 0);
+
+            if (usernameExists)
+            {
+                return Conflict("Username already exists");
+            }
+
+            User user = _mapper.Map<User>(userDto);
+            User addUser = await _userService.AddUser(user);
+            UserDto response = _mapper.Map<UserDto>(addUser);
+            return Ok(response);
         }
+
 
 
         /// <summary>
@@ -85,30 +109,54 @@ namespace UMS_API.Controllers
         /// <param name="id">The ID of the user to update.</param>
         /// <param name="userDto">The UserDto object containing updated user details.</param>
         /// <returns>An IActionResult containing the updated user.</returns>
-        
+
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
         {
+            if (userDto == null)
+            {
+                return BadRequest("User data is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            if (id == 0)
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
             bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, id);
 
             if (usernameExists)
             {
-                return Conflict("Username already exists");
+                return Conflict("Username already exists.");
             }
 
-            if (userDto == null || id == 0)
-                return BadRequest();
-
-            var existingUser = await _userService.GetUserById(id);
+            User existingUser = await _userService.GetUserById(id);
             if (existingUser == null)
-                return NotFound();
+            {
+                return NotFound("User not found.");
+            }
 
             _mapper.Map(userDto, existingUser);
-            var updatedUser = await _userService.UpdateUser(id, existingUser);
-            var response = _mapper.Map<UserDto>(updatedUser);
+            User updatedUser = await _userService.UpdateUser(id, existingUser);
+            UserDto response = _mapper.Map<UserDto>(updatedUser);
             return Ok(response);
         }
+
 
 
         /// <summary>
@@ -116,12 +164,17 @@ namespace UMS_API.Controllers
         /// </summary>
         /// <param name="id">An array of user IDs to delete.</param>
         /// <returns>An IActionResult indicating the result of the delete operation.</returns>
-       
+
         [Authorize]
         [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteUser([FromBody] int[] id)
         {
-            var result = await _userService.DeleteUser(id);
+            bool result = await _userService.DeleteUser(id);
 
             if (!result)
                 return NotFound();

@@ -90,13 +90,15 @@ export class UserComponent implements OnInit, OnDestroy {
         disabledSorting: false,
         defaultSortActiveColumn: 'userName',
         sortDisableClear: true,
-        defaultSortingOrder: 'desc'
+        defaultSortingOrder: 'desc',
+        isVisibleSortDirection: this.isVisibleFeatureByRole(),
+        isVisibleSorting: this.isVisibleFeatureByRole()
       },
 
       tableGridData: {
-        showSelectColumn: this.commonFunctionService.getUserRole() === 'Admin',
+        isShowSelectColumn: this.isVisibleFeatureByRole(),
+        isShowFilterOption: this.isVisibleFeatureByRole(),
         tableData: this.user,
-        isVisibleFeatureByRole: this.commonFunctionService.getUserRole() === 'Admin',
         callBackById: (data) => {
           const isDisabledByid = data.id === Number(this.userId)
           return isDisabledByid;
@@ -186,6 +188,9 @@ export class UserComponent implements OnInit, OnDestroy {
     }
   }
 
+  isVisibleFeatureByRole() {
+    return this.commonFunctionService.getUserRole() === 'Admin';
+  }
   checkUserid(id: number) {
     return id === Number(this.userId);
   }

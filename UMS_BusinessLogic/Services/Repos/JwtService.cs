@@ -33,22 +33,22 @@ namespace UMS_BusinessLogic.Services.Repos
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:key"]));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+                SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:key"]));
+                SigningCredentials credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                var tokenDescriptor = new SecurityTokenDescriptor
+                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new[]
                     {
-                        new Claim(ClaimTypes.Name, username),
-                        new Claim(ClaimTypes.Role, role),
-                    }),
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role),
+            }),
                     Expires = DateTime.UtcNow.AddMinutes(30),
                     SigningCredentials = credentials
                 };
 
-                var token = tokenHandler.CreateToken(tokenDescriptor);
+                SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
                 return tokenHandler.WriteToken(token);
             }
             catch (Exception ex)
@@ -58,6 +58,7 @@ namespace UMS_BusinessLogic.Services.Repos
             }
         }
 
+
         /// <summary>
         /// Verifies the provided JWT token.
         /// </summary>
@@ -66,11 +67,12 @@ namespace UMS_BusinessLogic.Services.Repos
         /// <returns>A boolean indicating whether the token is valid.</returns>
         public bool VerifyToken(string token, out JwtSecurityToken jwttoken)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:key"]);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.UTF8.GetBytes(_configuration["Jwt:key"]);
 
             try
             {
+                SecurityToken validatedToken;
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -78,7 +80,7 @@ namespace UMS_BusinessLogic.Services.Repos
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero,
-                }, out SecurityToken validatedToken);
+                }, out validatedToken);
 
                 jwttoken = (JwtSecurityToken)validatedToken;
 
@@ -91,5 +93,6 @@ namespace UMS_BusinessLogic.Services.Repos
                 return false;
             }
         }
+
     }
 }

@@ -68,9 +68,6 @@ export class CommonFunctionService {
         this.snackBar.open("Something is Wrong!", 'OK', { duration: 1500 });
         throw error;
     }
-    setToken(tokenValue: string) {
-        localStorage.setItem('token', tokenValue)
-    }
 
     getUserRole() {
         return localStorage.getItem('role')

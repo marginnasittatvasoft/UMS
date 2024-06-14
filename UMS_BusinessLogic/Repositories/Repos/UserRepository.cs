@@ -40,7 +40,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
         {
             try
             {
-                var userExists = await _userDbContext.Users
+                User? userExists = await _userDbContext.Users
                     .FirstOrDefaultAsync(u => (u.UserName == username || u.Email == email) && u.Id != id);
 
                 return userExists != null;
@@ -66,7 +66,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
         {
             try
             {
-                var user = await _userDbContext.Users.FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
+                User? user = await _userDbContext.Users.FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
                 if (user == null)
                 {
                     _logger.LogError($"User with username {username} not found");
@@ -89,6 +89,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
         {
             return await _baseRepository.GetById(id);
         }
+
 
         /// <summary>
         /// Retrieves multiple users based on the specified ID.

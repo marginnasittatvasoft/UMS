@@ -1,4 +1,4 @@
-export interface TableGridColumnHeaderConfig<T> {
+export interface TableGridColumnHeaderConfig {
     columnName?: string;
     isSortable?: boolean;
     isFilterable?: boolean;

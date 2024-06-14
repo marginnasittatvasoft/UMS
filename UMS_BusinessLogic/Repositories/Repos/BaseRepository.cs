@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UMS_BusinessLogic.Repositories.Interfaces;
@@ -128,11 +129,11 @@ namespace UMS_BusinessLogic.Repositories.Repos
         {
             try
             {
-                var entity = await _dbSet.FindAsync(id);
+                T? entity = await _dbSet.FindAsync(id);
                 if (entity == null)
                     return false;
 
-                var isDeletedProp = typeof(T).GetProperty("IsDeleted");
+                PropertyInfo? isDeletedProp = typeof(T).GetProperty("IsDeleted");
                 if (isDeletedProp != null)
                 {
                     isDeletedProp.SetValue(entity, true);
@@ -143,6 +144,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
                     _dbSet.Remove(entity);
                     await _dbContext.SaveChangesAsync();
                 }
+
                 return true;
             }
             catch (Exception ex)
@@ -152,6 +154,6 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
         }
 
-    
+
     }
 }

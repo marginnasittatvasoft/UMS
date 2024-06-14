@@ -27,8 +27,6 @@ import { CommonFunctionService } from '../../../shared/commonFunction/common.fun
 })
 
 export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
-  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
-
   @Input() config: TableDataGrid<T>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -43,6 +41,8 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   isHeaderSelected: boolean = false;
   defalutPageSize: number;
 
+  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
+
   ngOnInit() {
     this.initializeTable();
   }
@@ -54,8 +54,10 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    if (this.dataSource) {
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    }
   }
 
   initializeTable() {
@@ -64,7 +66,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
       this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
       this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
       this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.tableGridData.showSelectColumn && this.config.multipleDelete.callBack) {
+      if (this.config.tableGridData.isShowSelectColumn && this.config.multipleDelete.callBack) {
         this.addAnotherColumn.unshift('select');
       }
       if (this.config.actionButtons.length > 0) {
@@ -89,7 +91,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
       if (!this.isSortEnabled(sortHeaderId)) {
         return '';
       }
-      return data[sortHeaderId].toString().toLowerCase();
+      return data[sortHeaderId]?.toString().toLowerCase() || '';
     };
 
     this.dataSource.sort = this.sort;
@@ -100,7 +102,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
     this.dataSource.filter = filterValue;
     this.dataSource.filterPredicate = (data: T, filter: string) => {
       return columns.some(column => {
-        return data[column].toLowerCase().includes(filter);
+        return data[column]?.toString().toLowerCase().includes(filter);
       });
     };
   }
@@ -135,22 +137,16 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
     return this.dataSource.filteredData.length === 0 || this.dataSource.data.length === 0;
   }
 
-  isDisabledById(data: any): boolean {
-    if (this.config && this.config.tableGridData && this.config.tableGridData.callBackById) {
-      return this.config.tableGridData.callBackById(data);
-    }
-    return false;
+  isDisabledById(data: T): boolean {
+    return this.config?.tableGridData?.callBackById?.(data) ?? false;
   }
 
-  isButttonDisabledByIcon(data: any): boolean {
-    if (this.config && this.config.tableGridData && this.config.tableGridData.callBackByIcon) {
-      return this.config.tableGridData.callBackByIcon(data);
-    }
-    return false;
+  isButtonDisabledByIcon(data: any): boolean {
+    return this.config?.tableGridData?.callBackByIcon?.(data) ?? false;
   }
 
   get showFilterOption() {
-    if (this.config.tableGridData.isVisibleFeatureByRole) {
+    if (this.config.tableGridData.isShowFilterOption) {
       return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
     }
     return false;
@@ -180,11 +176,10 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   get disabledSorting() {
-    if (this.config.tableGridData.isVisibleFeatureByRole) {
+    if (this.config.sorting.isVisibleSorting) {
       return this.config.sorting?.disabledSorting ?? false;
     }
     return true;
-
   }
 
   get sortActiveColumn() {
@@ -196,7 +191,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   get sortDirection() {
-    if (this.config.tableGridData.isVisibleFeatureByRole) {
+    if (this.config.sorting.isVisibleSortDirection) {
       return this.config.sorting?.defaultSortingOrder ?? 'asc';
     }
     return '';

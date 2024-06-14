@@ -44,7 +44,7 @@ Log.Logger = new LoggerConfiguration()
 
 string GetLogFilePath()
 {
-    string logFolder = Path.Combine("Log", DateTime.Now.Year.ToString(), DateTime.Now.ToString("MM"));
+    string logFolder = Path.Combine("Log", DateTime.Now.Year.ToString(), DateTime.Now.ToString("MMM"));
     Directory.CreateDirectory(logFolder);
     string logFileName = DateTime.Now.ToString("dd") + "logfile" + ".txt";
     return Path.Combine(logFolder, logFileName);

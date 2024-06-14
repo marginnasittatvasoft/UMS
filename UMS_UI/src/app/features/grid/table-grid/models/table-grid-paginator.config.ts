@@ -1,4 +1,4 @@
-export interface TableGridPaginatorConfig<T> {
+export interface TableGridPaginatorConfig {
     defaultPageSize?: number;
     pageSizeOption?: number[];
     isShowFirstLastButton?: boolean;

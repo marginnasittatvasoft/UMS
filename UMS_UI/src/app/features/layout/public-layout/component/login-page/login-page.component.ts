@@ -20,6 +20,7 @@ import { loginForm } from '../../models/user.form.model';
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.css'
 })
+
 export class LoginPageComponent {
   constructor(private authService: AuthService, private router: Router, public commonFunctionService: CommonFunctionService) { }
   hide = true;
@@ -35,7 +36,6 @@ export class LoginPageComponent {
       this.authService.login(data).subscribe(result => {
         if (result.success) {
           this.commonFunctionService.showSnackbar("Successfully LogeedIn!", 1500)
-          this.commonFunctionService.setToken(result.token);
           this.router.navigate(['Ums/home'])
         } else {
           this.commonFunctionService.showSnackbar("Invalid Credentials!", 1500)

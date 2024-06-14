@@ -9,9 +9,8 @@ namespace UMS_DataAccess.Dto
     public class ApiResponseDto<T>
     {
         public bool success { get; set; }
-        public string? message { get; set; }
-        public T token { get; set; }
-        public string role { get; set; }
-        public int id { get; set; }
+        public T? token { get; set; }
+        public string? role { get; set; }
+        public int? id { get; set; }
     }
 }

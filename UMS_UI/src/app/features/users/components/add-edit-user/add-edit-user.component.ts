@@ -1,4 +1,3 @@
-
 import { Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, Optional, Output, SimpleChanges, input } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -13,7 +12,7 @@ import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 import { Subscription } from 'rxjs';
-import { AspNetRoles } from '../../models/user.model';
+import { AspNetRoles, User } from '../../models/user.model';
 
 
 @Component({
@@ -26,24 +25,26 @@ import { AspNetRoles } from '../../models/user.model';
 export class AddEditUserComponent implements OnDestroy {
   addUserForm!: FormGroup;
   userRoles: AspNetRoles[] = [];
-  isDialogMode: boolean = false;
-  isDisabledField: boolean;
-  isAdmin: boolean;
+  isDialogMode?: boolean = false;
+  isDisabledField?: boolean = false;
+  isAdmin: boolean = false;
   userId: number;
   hide = true;
   private subscriptions: Subscription = new Subscription();
 
 
-  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public commonFunctionService: CommonFunctionService, private router: Router) { }
+  constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User }, public commonFunctionService: CommonFunctionService, private router: Router) { }
 
   ngOnInit(): void {
     debugger;
     this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
-    this.isDisabledField = Number(this.commonFunctionService.getUserId()) === this.data.user.id;
-    this.isDialogMode = !!this.data;
+    if (this.data != null && this.data.user != null) {
+      this.isDisabledField = Number(this.commonFunctionService.getUserId()) === this.data.user.id;
+      this.isDialogMode = !!this.data.user;
+    }
     this.createForm();
     this.loadAspNetUserRoles();
-    if (this.isDialogMode && this.data && this.data.user) {
+    if (this.isDialogMode && this.data.user) {
       const userData = this.data.user;
       this.addUserForm.patchValue(userData);
     }
@@ -54,8 +55,6 @@ export class AddEditUserComponent implements OnDestroy {
   }
 
   createForm() {
-
-    debugger;
     this.addUserForm = this.formbuilder.group({
       id: ['', []],
       firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
@@ -70,6 +69,7 @@ export class AddEditUserComponent implements OnDestroy {
       roleId: ['', [Validators.required]],
     });
   }
+
   loadAspNetUserRoles() {
     const loadRolesSub = this.userService.getRoles().subscribe((data) => {
       this.userRoles = data;
@@ -101,7 +101,6 @@ export class AddEditUserComponent implements OnDestroy {
         this.router.navigate(['/Ums/user']);
       },
       error: (error) => {
-        debugger;
         if (error.status === 409) {
           this.commonFunctionService.showSnackbar("User already exists!", 1500);
           this.addUserForm.patchValue({ email: '' });

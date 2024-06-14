@@ -1,9 +1,10 @@
+import { BlobOptions } from "buffer";
 import { User } from "../../../users/models/user.model";
 
 export interface TableGridDataConfig<T> {
-    showSelectColumn?: boolean;
+    isShowSelectColumn?: boolean;
+    isShowFilterOption?: boolean;
     tableData?: T[];
-    isVisibleFeatureByRole?: boolean;
     callBackById?: ((data: T) => boolean);
-    callBackByIcon?: ((data:any) => boolean);
+    callBackByIcon?: ((data: any) => boolean);
 }

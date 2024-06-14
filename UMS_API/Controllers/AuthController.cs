@@ -28,41 +28,52 @@ namespace UMS_API.Controllers
             _authService = authService;
         }
 
+
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApiResponseDto<string>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponseDto<string>>> LoginUser([FromBody] LoginDto loginDto)
         {
             ApiResponseDto<string> response = new ApiResponseDto<string>();
-            if (loginDto != null)
+
+            if (loginDto == null)
             {
-                bool isAuthenticated = await _authService.Authenticate(loginDto.UserName, loginDto.Password);
-                
+                return BadRequest("Login data is required.");
+            }
 
-                if (isAuthenticated)
+            if (!ModelState.IsValid)
+            {
+
+                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            bool isAuthenticated = await _authService.Authenticate(loginDto.UserName, loginDto.Password);
+
+            if (isAuthenticated)
+            {
+                User user = await _userService.GetUserByUsername(loginDto.UserName);
+
+                if (user != null)
                 {
-                    User user = await _userService.GetUserByUsername(loginDto.UserName);
-
-                    if(user!=null)
-                    {
-                        AspNetRole? aspNetRole = await _userService.GetRoleNameById(user.RoleId);
-
-                        var token = _jwtService.GetJwtToken(loginDto.UserName, aspNetRole.Role);
-                        response.success = true;
-                        response.message = "Login Successfull";
-                        response.token = token;
-                        response.role = aspNetRole.Role;
-                        response.id = user.Id;
-                        return Ok(response);
-                    }
-                }
-                else
-                {
-                    response.success = false;
+                    AspNetRole? aspNetRole = await _userService.GetRoleNameById(user.RoleId);
+                    var token = _jwtService.GetJwtToken(loginDto.UserName, aspNetRole.Role);
+                    response.success = true;
+                    response.token = token;
+                    response.role = aspNetRole.Role;
+                    response.id = user.Id;
                     return Ok(response);
                 }
             }
 
-            return BadRequest();
+            response.success = false;
+            return Ok(response);
         }
+
     }
 
 }

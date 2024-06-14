@@ -141,7 +141,7 @@ namespace UMS_BusinessLogic.Services.Repos
         {
             try
             {
-                var existingUser = await _userRepository.GetUserById(id);
+                User existingUser = await _userRepository.GetUserById(id);
                 if (existingUser == null)
                     return null;
                 _mapper.Map(user, existingUser);
@@ -176,6 +176,13 @@ namespace UMS_BusinessLogic.Services.Repos
         #endregion
 
         #region AspNetRolesData
+
+        /// <summary>
+        /// Retrieves an AspNetRole by its ID from the repository.
+        /// </summary>
+        /// <param name="id">The ID of the role to retrieve.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the AspNetRole object corresponding to the provided ID.</returns>
         public async Task<AspNetRole> GetRoleNameById(int id)
         {
             try
@@ -189,6 +196,12 @@ namespace UMS_BusinessLogic.Services.Repos
             }
         }
 
+
+        /// <summary>
+        /// Retrieves all roles from the repository.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains a list of AspNetRole objects representing all roles.</returns>
         public async Task<List<AspNetRole>> GetAllRoles() {
             try
             {

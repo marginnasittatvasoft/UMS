@@ -132,6 +132,7 @@
         </div>
 
         <div class="row">
+            @if (isAdmin) {
             <mat-form-field class="mb-3 col-6" appearance="outline">
                 <mat-label>Role Type</mat-label>
                 <mat-select formControlName="roleId">
@@ -141,7 +142,7 @@
                     </mat-option>
                 </mat-select>
             </mat-form-field>
-            @if (!isDialogMode || !isAdmin) {
+            }
             <mat-form-field class="mb-3 col-6" appearance="outline">
                 <mat-label>Password</mat-label>
                 <input matInput [type]="hide ? 'password' : 'text'"
@@ -157,7 +158,7 @@
                 </mat-error>
                 }
             </mat-form-field>
-            }
+
         </div>
 
         <div class="d-flex justify-content-end" *ngIf="!isDialogMode">
