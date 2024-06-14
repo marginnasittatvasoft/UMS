@@ -16,13 +16,13 @@ namespace UMS_API.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ILogger<UserController> _logger;
+        private readonly IRoleService _roleService;
 
-        public UserController(IMapper mapper, IUserService userService, ILogger<UserController> logger)
+        public UserController(IMapper mapper, IUserService userService, IRoleService roleService)
         {
             _mapper = mapper;
             _userService = userService;
-            _logger = logger;
+            _roleService = roleService;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace UMS_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllRoles()
         {
-            List<AspNetRole> roles = await _userService.GetAllRoles();
+            List<AspNetRole> roles = await _roleService.GetAllRoles();
             return Ok(roles);
         }
 
@@ -75,24 +75,10 @@ namespace UMS_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateUser([FromBody] UserDto userDto)
         {
-            if (userDto == null)
+            IActionResult validation = await ValidateUserDto(userDto);
+            if (validation != null)
             {
-                return BadRequest("User data is required.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
-                                              .Select(e => e.ErrorMessage)
-                                              .ToList();
-                return BadRequest(new { Errors = errors });
-            }
-
-            bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, 0);
-
-            if (usernameExists)
-            {
-                return Conflict("Username already exists");
+                return validation;
             }
 
             User user = _mapper.Map<User>(userDto);
@@ -120,29 +106,15 @@ namespace UMS_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserDto userDto)
         {
-            if (userDto == null)
-            {
-                return BadRequest("User data is required.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
-                                              .Select(e => e.ErrorMessage)
-                                              .ToList();
-                return BadRequest(new { Errors = errors });
-            }
-
             if (id == 0)
             {
                 return BadRequest("Invalid user ID.");
             }
 
-            bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, id);
-
-            if (usernameExists)
+            IActionResult validation = await ValidateUserDto(userDto, id);
+            if (validation != null)
             {
-                return Conflict("Username already exists.");
+                return validation;
             }
 
             User existingUser = await _userService.GetUserById(id);
@@ -181,5 +153,43 @@ namespace UMS_API.Controllers
 
             return NoContent();
         }
+
+
+        /// <summary>
+        /// Validates the provided UserDto object for user creation or update.
+        /// </summary>
+        /// <param name="userDto">The UserDto object containing user details.</param>
+        /// <param name="userId">The optional user ID used to check for username uniqueness during updates.</param>
+        /// <returns>
+        /// Returns an IActionResult:
+        /// - BadRequest if userDto is null or ModelState is invalid, with a list of validation errors.
+        /// - Conflict if the username or email already exists in the database.
+        /// - Null if validation succeeds.
+        /// </returns>
+        private async Task<IActionResult> ValidateUserDto(UserDto userDto, int userId = 0)
+        {
+            if (userDto == null)
+            {
+                return BadRequest("User data is required.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                List<string> errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                return BadRequest(new { Errors = errors });
+            }
+
+            bool usernameExists = await _userService.UserExists(userDto.UserName, userDto.Email, userId);
+
+            if (usernameExists)
+            {
+                return Conflict("Username already exists.");
+            }
+
+            return null;
+        }
+
     }
 }

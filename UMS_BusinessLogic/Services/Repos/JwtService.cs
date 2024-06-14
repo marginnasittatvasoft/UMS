@@ -51,10 +51,9 @@ namespace UMS_BusinessLogic.Services.Repos
                 SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
                 return tokenHandler.WriteToken(token);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw ex;
+                throw new Exception();
             }
         }
 
@@ -86,11 +85,11 @@ namespace UMS_BusinessLogic.Services.Repos
 
                 return jwttoken != null;
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
                 jwttoken = null;
                 return false;
+                throw new Exception();
             }
         }
 

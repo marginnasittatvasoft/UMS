@@ -44,8 +44,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error occurred while authenticating user: " + ex.ToString());
-                throw;
+                throw new Exception("Error occurred while authenticating user: ", ex);
             }
         }
 

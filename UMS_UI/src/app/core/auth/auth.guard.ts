@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
   let subscription: Subscription;

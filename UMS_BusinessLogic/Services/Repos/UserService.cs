@@ -18,7 +18,7 @@ namespace UMS_BusinessLogic.Services.Repos
     {
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
-        private readonly IAspNetRoleRepository _aspNetRoleRepository;
+
         private readonly ILogger<UserService> _logger;
 
         public UserService(IMapper mapper, IUserRepository userRepository, ILogger<UserService> logger, IAspNetRoleRepository aspNetRoleRepository)
@@ -26,7 +26,6 @@ namespace UMS_BusinessLogic.Services.Repos
             _mapper = mapper;
             _userRepository = userRepository;
             _logger = logger;
-            _aspNetRoleRepository = aspNetRoleRepository;
         }
 
         #region User Existence
@@ -44,10 +43,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.UserExists(username, email, id);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -66,10 +64,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.GetUserById(id);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -84,10 +81,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.GetMutipleUsers(id);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -102,10 +98,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.GetUserByUsername(username);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -124,10 +119,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.AddUser(user);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -148,10 +142,9 @@ namespace UMS_BusinessLogic.Services.Repos
 
                 return await _userRepository.UpdateUser(existingUser);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
@@ -166,55 +159,15 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return await _userRepository.DeleteUser(ids);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 
         #endregion
 
-        #region AspNetRolesData
-
-        /// <summary>
-        /// Retrieves an AspNetRole by its ID from the repository.
-        /// </summary>
-        /// <param name="id">The ID of the role to retrieve.</param>
-        /// <returns>A task that represents the asynchronous operation. 
-        /// The task result contains the AspNetRole object corresponding to the provided ID.</returns>
-        public async Task<AspNetRole> GetRoleNameById(int id)
-        {
-            try
-            {
-                return await _aspNetRoleRepository.GetRoleById(id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Retrieves all roles from the repository.
-        /// </summary>
-        /// <returns>A task that represents the asynchronous operation. 
-        /// The task result contains a list of AspNetRole objects representing all roles.</returns>
-        public async Task<List<AspNetRole>> GetAllRoles() {
-            try
-            {
-                return await _aspNetRoleRepository.GetAllRoles();
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-                throw;
-            }
-        }
-
-        #endregion
+       
 
     }
 }

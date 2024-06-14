@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, Optional, Output, SimpleChanges, input } from '@angular/core';
+import { Component, Inject, OnDestroy, Optional } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -12,7 +12,7 @@ import { UserService } from '../../services/user.service';
 import { MAT_DIALOG_DATA, MatDialogContent, MatDialogModule, MatDialogTitle } from '@angular/material/dialog';
 import { CommonFunctionService } from '../../../../shared/commonFunction/common.function.service';
 import { Subscription } from 'rxjs';
-import { AspNetRoles, User } from '../../models/user.model';
+import { Roles, User } from '../../models/user.model';
 
 
 @Component({
@@ -22,9 +22,10 @@ import { AspNetRoles, User } from '../../models/user.model';
   templateUrl: './add-edit-user.component.html',
   styleUrl: './add-edit-user.component.css'
 })
+
 export class AddEditUserComponent implements OnDestroy {
   addUserForm!: FormGroup;
-  userRoles: AspNetRoles[] = [];
+  userRoles: Roles[] = [];
   isDialogMode?: boolean = false;
   isDisabledField?: boolean = false;
   isAdmin: boolean = false;
@@ -32,18 +33,16 @@ export class AddEditUserComponent implements OnDestroy {
   hide = true;
   private subscriptions: Subscription = new Subscription();
 
-
   constructor(private formbuilder: FormBuilder, private userService: UserService, @Optional() @Inject(MAT_DIALOG_DATA) public data: { user: User }, public commonFunctionService: CommonFunctionService, private router: Router) { }
 
   ngOnInit(): void {
-    debugger;
-    this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
+    this.isAdmin = this.commonFunctionService.isAdminRole();
     if (this.data != null && this.data.user != null) {
-      this.isDisabledField = Number(this.commonFunctionService.getUserId()) === this.data.user.id;
+      this.isDisabledField = true;
       this.isDialogMode = !!this.data.user;
     }
     this.createForm();
-    this.loadAspNetUserRoles();
+    this.loadUserRoles();
     if (this.isDialogMode && this.data.user) {
       const userData = this.data.user;
       this.addUserForm.patchValue(userData);
@@ -54,7 +53,7 @@ export class AddEditUserComponent implements OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  createForm() {
+  createForm(): void {
     this.addUserForm = this.formbuilder.group({
       id: ['', []],
       firstName: ['', [Validators.required, Validators.maxLength(20), Validators.minLength(2)]],
@@ -70,14 +69,14 @@ export class AddEditUserComponent implements OnDestroy {
     });
   }
 
-  loadAspNetUserRoles() {
-    const loadRolesSub = this.userService.getRoles().subscribe((data) => {
+  loadUserRoles(): void {
+    const roles = this.userService.getRoles().subscribe((data) => {
       this.userRoles = data;
     });
-    this.subscriptions.add(loadRolesSub);
+    this.subscriptions.add(roles);
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.addUserForm.valid) {
       if (this.addUserForm.controls['email'].disabled) {
         this.addUserForm.controls['email'].enable();
@@ -93,8 +92,8 @@ export class AddEditUserComponent implements OnDestroy {
     }
   }
 
-  submitStandaloneForm() {
-    const addUserSub = this.userService.addUser(this.addUserForm.value).subscribe({
+  submitStandaloneForm(): void {
+    const userData = this.userService.addUser(this.addUserForm.value).subscribe({
       next: () => {
         this.resetForm();
         this.commonFunctionService.showSnackbar("Data Added Successfully!", 1500);
@@ -110,11 +109,11 @@ export class AddEditUserComponent implements OnDestroy {
         }
       },
     });
-    this.subscriptions.add(addUserSub);
+    this.subscriptions.add(userData);
   }
 
-  submitDialogForm() {
-    const updateUserSub = this.userService.updateUser(this.addUserForm.value).subscribe({
+  submitDialogForm(): void {
+    const userData = this.userService.updateUser(this.addUserForm.value).subscribe({
       next: () => {
         this.commonFunctionService.showSnackbar("Data Updated Successfully!", 1500);
       },
@@ -128,7 +127,7 @@ export class AddEditUserComponent implements OnDestroy {
         }
       },
     });
-    this.subscriptions.add(updateUserSub);
+    this.subscriptions.add(userData);
   }
 
   resetForm() {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
+import { UserRole } from '../../features/users/models/user-role.enum';
 
 @Injectable({
     providedIn: 'root'
@@ -29,7 +30,7 @@ export class CommonFunctionService {
             if (formField == 'phone') {
                 return `${controlName} must be 10 digits.`;
             }
-            return 'Invalid format! Password must contain at least 1 uppercase, 1 lowercase, 1 digit and the total length should be greater than or equal to 8 and less or equal to 16 ';
+            return 'Invalid format! Password must contain at least 1 uppercase, 1 lowercase, 1 digit and the total length should be greater than or equal to 6 and less or equal to 16 ';
         }
 
         if (control?.hasError('minlength')) {
@@ -74,6 +75,10 @@ export class CommonFunctionService {
     }
     getUserId() {
         return localStorage.getItem('id')
+    }
+
+    isAdminRole(): boolean {
+        return this.getUserRole() === UserRole.Admin;
     }
 }
 

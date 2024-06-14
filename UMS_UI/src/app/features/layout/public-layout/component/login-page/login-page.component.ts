@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -30,7 +30,7 @@ export class LoginPageComponent {
   });
 
 
-  submit() {
+  submit(): void {
     if (this.loginForm.valid) {
       const data: LoginDto = { ...this.loginForm.value } as LoginDto;
       this.authService.login(data).subscribe(result => {

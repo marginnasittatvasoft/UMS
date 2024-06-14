@@ -22,11 +22,6 @@ namespace UMS_BusinessLogic.Services.Interfaces
         Task<bool> DeleteUser(int[] id);
         #endregion
 
-        #region AspNetRolesData
-
-        Task<AspNetRole> GetRoleNameById(int id);
-        Task<List<AspNetRole>> GetAllRoles();
-
-        #endregion
+       
     }
 }

@@ -11,10 +11,7 @@ import { User } from '../../models/user.model';
   styleUrl: './user-delete-modal.component.css'
 })
 export class UserDeleteModalComponent {
-  constructor(
-    public dialogRef: MatDialogRef<UserDeleteModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: User
-  ) { }
+  constructor(public dialogRef: MatDialogRef<UserDeleteModalComponent>, @Inject(MAT_DIALOG_DATA) public data: User) { }
 
   onCancelDelete(): void {
     this.dialogRef.close();

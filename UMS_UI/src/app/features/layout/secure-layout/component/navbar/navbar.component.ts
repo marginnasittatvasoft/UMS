@@ -14,6 +14,7 @@ import { CommonFunctionService } from '../../../../../shared/commonFunction/comm
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
+
 export class NavbarComponent {
   isLoggedIn: boolean = false;
   userRole: string;
@@ -30,13 +31,6 @@ export class NavbarComponent {
   getNavigationLinks(): { label: string, route: string }[] {
     this.userRole = this.commonFunctionService.getUserRole();
     if (this.isLoggedIn && this.userRole === "Admin") {
-      return [
-        { label: 'Home', route: '/Ums/home' },
-        { label: 'User', route: '/Ums/user' },
-        { label: 'Add_User', route: '/Ums/adduser' }
-      ];
-    }
-    else if (this.isLoggedIn && this.userRole !== "Admin") {
       return [
         { label: 'Home', route: '/Ums/home' },
         { label: 'User', route: '/Ums/user' },

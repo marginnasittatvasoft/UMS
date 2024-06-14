@@ -36,10 +36,9 @@ namespace UMS_BusinessLogic.Services.Repos
             {
                 return _authRepository.AuthenticateUser(username, password);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception();
             }
         }
 

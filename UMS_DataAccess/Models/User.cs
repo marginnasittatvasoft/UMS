@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -45,8 +46,5 @@ namespace UMS_DataAccess.Models
         public AspNetRole Role { get; set; }
         [ForeignKey("Role")]
         public int RoleId { get; set; }
-
-  
-
     }
 }

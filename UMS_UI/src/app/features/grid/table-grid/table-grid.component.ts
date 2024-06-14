@@ -2,17 +2,15 @@
 import { AfterViewInit, Component, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSort, Sort, MatSortModule, SortDirection } from '@angular/material/sort';
+import { MatSort, MatSortModule, SortDirection } from '@angular/material/sort';
 import { TableDataGrid } from './models/table-grid.config';
-import { MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { User } from '../../users/models/user.model';
 import { UserService } from '../../users/services/user.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { UserDeleteModalComponent } from '../../users/components/user-delete-modal/user-delete-modal.component';
 import { RouterLink } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -41,113 +39,9 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   isHeaderSelected: boolean = false;
   defalutPageSize: number;
 
-  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
-
-  ngOnInit() {
-    this.initializeTable();
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['config']) {
-      this.initializeTable();
-    }
-  }
-
-  ngAfterViewInit() {
-    if (this.dataSource) {
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    }
-  }
-
-  initializeTable() {
-    if (this.config) {
-      this.displayedColumns = this.config.headerColumn.map(i => i.columnName);
-      this.filterDataColumn = this.config.headerColumn.filter(i => i.isFilterable).map(i => i.columnName);
-      this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
-      this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.tableGridData.isShowSelectColumn && this.config.multipleDelete.callBack) {
-        this.addAnotherColumn.unshift('select');
-      }
-      if (this.config.actionButtons.length > 0) {
-        this.addAnotherColumn.push('action');
-      }
-      this.defaultSortColumn = this.config.sorting.defaultSortActiveColumn;
-      this.applySorting(this.config.headerColumn.filter(x => x.isSortable).map(i => i.columnName));
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-    }
-  }
-
-  isSortEnabled(column: string): boolean {
-    return this.selectedSortColumns.includes(column);
-  }
-
-  applySorting(selectedColumns: string[]) {
-    this.selectedSortColumns = [...selectedColumns];
-    this.selectedSortColumns.push(this.defaultSortColumn);
-
-    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
-      if (!this.isSortEnabled(sortHeaderId)) {
-        return '';
-      }
-      return data[sortHeaderId]?.toString().toLowerCase() || '';
-    };
-
-    this.dataSource.sort = this.sort;
-  }
-
-  applyFilter(event: Event, columns: string[]) {
-    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.filter = filterValue;
-    this.dataSource.filterPredicate = (data: T, filter: string) => {
-      return columns.some(column => {
-        return data[column]?.toString().toLowerCase().includes(filter);
-      });
-    };
-  }
-
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.filter(data => !this.isDisabledById(data)).length;
-    return numSelected === numRows;
-  }
-
-  toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-      return;
-    }
-    this.selection.select(...this.dataSource.data.filter(data => !this.isDisabledById(data)));
-  }
-
-  deleteSelectedData(): void {
-    const deleteSelectedIds = this.config.multipleDelete;
-    if (this.config && deleteSelectedIds) {
-      if (deleteSelectedIds.callBack) {
-        const selectedData = this.selection.selected.map(item => item);
-        deleteSelectedIds.callBack(selectedData);
-        this.selection.clear();
-        this.isHeaderSelected = false;
-      }
-    }
-  }
-
-  isNoDataFound(): boolean {
-    return this.dataSource.filteredData.length === 0 || this.dataSource.data.length === 0;
-  }
-
-  isDisabledById(data: T): boolean {
-    return this.config?.tableGridData?.callBackById?.(data) ?? false;
-  }
-
-  isButtonDisabledByIcon(data: any): boolean {
-    return this.config?.tableGridData?.callBackByIcon?.(data) ?? false;
-  }
-
   get showFilterOption() {
-    if (this.config.tableGridData.isShowFilterOption) {
-      return this.config.headerColumn.filter(i => i.isFilterable).length > 0;
+    if (this.config.features.isShowFilterOption) {
+      return this.config.column.filter(i => i.isFilterable).length > 0;
     }
     return false;
   }
@@ -195,6 +89,108 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
       return this.config.sorting?.defaultSortingOrder ?? 'asc';
     }
     return '';
+  }
+
+  constructor(private userService: UserService, public dialog: MatDialog, public commonFunctionService: CommonFunctionService) { }
+
+  ngOnInit(): void {
+    this.initializeTable();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['config']) {
+      this.initializeTable();
+    }
+    this.selection.clear();
+    this.isHeaderSelected = false;
+  }
+
+  ngAfterViewInit(): void {
+    if (this.dataSource) {
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    }
+  }
+
+  initializeTable(): void {
+    if (this.config) {
+      this.displayedColumns = this.config.column.map(i => i.columnName);
+      this.filterDataColumn = this.config.column.filter(i => i.isFilterable).map(i => i.columnName);
+      this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
+      this.addAnotherColumn = [...this.displayedColumns];
+      if (this.config.features.isShowSelectColumn && this.config.multipleDelete.callBack) {
+        this.addAnotherColumn.unshift('select');
+      }
+      if (this.config.actionButtons.length > 0) {
+        this.addAnotherColumn.push('action');
+      }
+      this.defaultSortColumn = this.config.sorting.defaultSortActiveColumn;
+      this.applySorting(this.config.column.filter(x => x.isSortable).map(i => i.columnName));
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    }
+  }
+
+  isSortEnabled(column: string): boolean {
+    return this.selectedSortColumns.includes(column);
+  }
+
+  applySorting(selectedColumns: string[]) {
+    this.selectedSortColumns = [...selectedColumns];
+    this.selectedSortColumns.push(this.defaultSortColumn);
+
+    this.dataSource.sortingDataAccessor = (data, sortHeaderId) => {
+      if (!this.isSortEnabled(sortHeaderId)) {
+        return '';
+      }
+      return data[sortHeaderId]?.toString().toLowerCase() || '';
+    };
+
+    this.dataSource.sort = this.sort;
+  }
+
+  applyFilter(event: Event, columns: string[]) {
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    this.dataSource.filter = filterValue;
+    this.dataSource.filterPredicate = (data: T, filter: string) => {
+      return columns.some(column => {
+        return data[column]?.toString().toLowerCase().includes(filter);
+      });
+    };
+  }
+
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.filter(data => !this.isDisabledById(data)).length;
+    return numSelected === numRows;
+  }
+
+  toggleAllRows(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+    this.selection.select(...this.dataSource.data.filter(data => !this.isDisabledById(data)));
+  }
+
+  deleteSelectedData(): void {
+    const deleteSelectedIds = this.config.multipleDelete;
+    if (this.config && deleteSelectedIds) {
+      if (deleteSelectedIds.callBack) {
+        const selectedData = this.selection.selected.map(item => item);
+        deleteSelectedIds.callBack(selectedData);
+        this.selection.clear();
+        this.isHeaderSelected = false;
+      }
+    }
+  }
+
+  isNoDataFound(): boolean {
+    return this.dataSource.filteredData.length === 0 || this.dataSource.data.length === 0;
+  }
+
+  isDisabledById(data: T): boolean {
+    return this.config?.features?.callBackById?.(data) ?? false;
   }
 
 }

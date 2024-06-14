@@ -11,8 +11,8 @@ using UMS_DataAccess.Models;
 namespace UMS_DataAccess.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240611063406_AddRoleidColumn")]
-    partial class AddRoleidColumn
+    [Migration("20240614110214_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,36 @@ namespace UMS_DataAccess.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("UMS_DataAccess.Models.AspNetRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Role = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Role = "User"
+                        });
+                });
 
             modelBuilder.Entity("UMS_DataAccess.Models.User", b =>
                 {
@@ -83,7 +113,58 @@ namespace UMS_DataAccess.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            City = "Ahmedabad",
+                            Email = "admin@gmail.com",
+                            FirstName = "Admin",
+                            IsDeleted = false,
+                            LastName = "Tatvasoft",
+                            Password = "Admin@123",
+                            Phone = "8523698523",
+                            RoleId = 1,
+                            State = "Gujarat",
+                            Street = "Rajpath club Road",
+                            UserName = "Admin123"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            City = "Ahmedabad",
+                            Email = "user@gamil.com",
+                            FirstName = "User",
+                            IsDeleted = false,
+                            LastName = "Tatvasoft",
+                            Password = "User@123",
+                            Phone = "9876543210",
+                            RoleId = 2,
+                            State = "Gujarat",
+                            Street = "Rajpath Club Road",
+                            UserName = "User123"
+                        });
+                });
+
+            modelBuilder.Entity("UMS_DataAccess.Models.User", b =>
+                {
+                    b.HasOne("UMS_DataAccess.Models.AspNetRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 #pragma warning restore 612, 618
         }

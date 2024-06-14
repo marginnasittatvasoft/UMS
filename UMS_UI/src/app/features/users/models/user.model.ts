@@ -12,7 +12,7 @@ export interface User {
     roleId: number;
 }
 
-export interface AspNetRoles {
+export interface Roles {
     id: number;
     role: string;
 }

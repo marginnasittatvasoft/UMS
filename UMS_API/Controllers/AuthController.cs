@@ -13,19 +13,19 @@ namespace UMS_API.Controllers
     [ApiController]
     public class AuthController : Controller
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
+        private readonly IRoleService _roleService;
         private readonly ILogger<UserController> _logger;
         private readonly IJwtService _jwtService;
 
-        public AuthController(IMapper mapper, IUserService userService, ILogger<UserController> logger, IJwtService jwtService, IAuthService authService)
+        public AuthController(IUserService userService, ILogger<UserController> logger, IJwtService jwtService, IAuthService authService,IRoleService roleService)
         {
-            _mapper = mapper;
             _userService = userService;
             _logger = logger;
             _jwtService = jwtService;
             _authService = authService;
+            _roleService=roleService;
         }
 
 
@@ -60,7 +60,7 @@ namespace UMS_API.Controllers
 
                 if (user != null)
                 {
-                    AspNetRole? aspNetRole = await _userService.GetRoleNameById(user.RoleId);
+                    AspNetRole? aspNetRole = await _roleService.GetRoleNameById(user.RoleId);
                     var token = _jwtService.GetJwtToken(loginDto.UserName, aspNetRole.Role);
                     response.success = true;
                     response.token = token;

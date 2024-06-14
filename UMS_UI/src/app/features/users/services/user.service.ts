@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { AspNetRoles, User } from '../models/user.model';
+import { Roles, User } from '../models/user.model';
 import { Observable, catchError, forkJoin } from 'rxjs';
 import { endPoint } from '../../../shared/endpoints/endpoints.const';
 import { CommonFunctionService } from '../../../shared/commonFunction/common.function.service';
@@ -19,8 +19,8 @@ export class UserService {
       );
   }
 
-  getRoles(): Observable<AspNetRoles[]> {
-    return this.http.get<AspNetRoles[]>(endPoint.AllRoles)
+  getRoles(): Observable<Roles[]> {
+    return this.http.get<Roles[]>(endPoint.AllRoles)
       .pipe(
         catchError(this.commonFunctionService.handleError)
       );

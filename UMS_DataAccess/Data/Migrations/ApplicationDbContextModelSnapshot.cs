@@ -37,6 +37,18 @@ namespace UMS_DataAccess.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AspNetRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Role = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Role = "User"
+                        });
                 });
 
             modelBuilder.Entity("UMS_DataAccess.Models.User", b =>
@@ -98,9 +110,47 @@ namespace UMS_DataAccess.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("RoleId");
 
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            City = "Ahmedabad",
+                            Email = "admin@gmail.com",
+                            FirstName = "Admin",
+                            IsDeleted = false,
+                            LastName = "Tatvasoft",
+                            Password = "Admin@123",
+                            Phone = "8523698523",
+                            RoleId = 1,
+                            State = "Gujarat",
+                            Street = "Rajpath club Road",
+                            UserName = "Admin123"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            City = "Ahmedabad",
+                            Email = "user@gamil.com",
+                            FirstName = "User",
+                            IsDeleted = false,
+                            LastName = "Tatvasoft",
+                            Password = "User@123",
+                            Phone = "9876543210",
+                            RoleId = 2,
+                            State = "Gujarat",
+                            Street = "Rajpath Club Road",
+                            UserName = "User123"
+                        });
                 });
 
             modelBuilder.Entity("UMS_DataAccess.Models.User", b =>

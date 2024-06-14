@@ -1,21 +1,20 @@
-import { AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatCheckbox, MatCheckboxChange, MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
-import { Route, Router, RouterLink } from '@angular/router';
-import { MatSort, Sort, MatSortModule, SortDirection } from '@angular/material/sort';
+import { Router, RouterLink } from '@angular/router';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { AddEditUserComponent } from '../add-edit-user/add-edit-user.component';
-import { MatDialog, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { UserDeleteModalComponent } from '../user-delete-modal/user-delete-modal.component';
 import { TableGridComponent } from '../../../grid/table-grid/table-grid.component';
 import { TableDataGrid } from '../../../grid/table-grid/models/table-grid.config';
@@ -51,22 +50,22 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
 
-  loadUsers() {
+  loadUsers(): void {
     this.userId = this.commonFunctionService.getUserId();
+    this.isAdmin = this.commonFunctionService.isAdminRole();
     if (this.userId) {
       const id = Number(this.userId);
       if (!isNaN(id)) {
-        const loadUsersSub = this.userService.getUsers(id).subscribe({
+        const loadUsers = this.userService.getUsers(id).subscribe({
           next: (data) => {
             this.user = data;
-            this.isAdmin = this.commonFunctionService.getUserRole() === 'Admin';
             this.loadTable();
           },
           error: () => {
             this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
           }
         });
-        this.subscriptions.add(loadUsersSub);
+        this.subscriptions.add(loadUsers);
       } else {
         this.commonFunctionService.showSnackbar("Something is wrong!", 1500);
       }
@@ -75,7 +74,7 @@ export class UserComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadTable() {
+  loadTable(): void {
     this.datagridConfig = {
       pagination: {
         defaultPageSize: 5,
@@ -83,7 +82,7 @@ export class UserComponent implements OnInit, OnDestroy {
         isShowFirstLastButton: true,
         isHidePageSizeOption: false,
         isDisabledPagination: false,
-        isShowPagination: this.commonFunctionService.getUserRole() === 'Admin'
+        isShowPagination: this.isAdmin,
       },
 
       sorting: {
@@ -91,28 +90,27 @@ export class UserComponent implements OnInit, OnDestroy {
         defaultSortActiveColumn: 'userName',
         sortDisableClear: true,
         defaultSortingOrder: 'desc',
-        isVisibleSortDirection: this.isVisibleFeatureByRole(),
-        isVisibleSorting: this.isVisibleFeatureByRole()
+        isVisibleSortDirection: this.isAdmin,
+        isVisibleSorting: this.isAdmin,
       },
 
       tableGridData: {
-        isShowSelectColumn: this.isVisibleFeatureByRole(),
-        isShowFilterOption: this.isVisibleFeatureByRole(),
         tableData: this.user,
+      },
+
+      features: {
+        isShowSelectColumn: this.isAdmin,
+        isShowFilterOption: this.isAdmin,
         callBackById: (data) => {
           const isDisabledByid = data.id === Number(this.userId)
           return isDisabledByid;
         },
-        callBackByIcon: (data) => {
-          const isDisabledByIcon = data.icon === 'delete'
-          return isDisabledByIcon;
-        },
       },
 
-      headerColumn: [
+      column: [
         {
           columnName: 'userName',
-          isSortable: false,
+          isSortable: true,
           isFilterable: true,
         },
         {
@@ -123,12 +121,12 @@ export class UserComponent implements OnInit, OnDestroy {
         {
           columnName: 'lastName',
           isSortable: true,
-          isFilterable: false,
+          isFilterable: true,
         },
         {
           columnName: 'email',
           isSortable: false,
-          isFilterable: false,
+          isFilterable: true,
         },
         {
           columnName: 'phone',
@@ -158,7 +156,10 @@ export class UserComponent implements OnInit, OnDestroy {
           icon: 'edit',
           color: 'primary',
           callBack: (data) => {
-            this.EditUserForm(data);
+            this.editUserForm(data);
+          },
+          visibilityCallBack: (data) => {
+            return false;
           }
         },
         {
@@ -166,6 +167,10 @@ export class UserComponent implements OnInit, OnDestroy {
           color: 'warn',
           callBack: (data) => {
             this.deleteUser([data.id]);
+          },
+          visibilityCallBack: (data) => {
+            const isDisabledByid = data.id === Number(this.userId)
+            return isDisabledByid;
           }
         },
       ],
@@ -182,24 +187,18 @@ export class UserComponent implements OnInit, OnDestroy {
         color: 'primary',
         isVisible: this.isAdmin,
         callBack: () => {
-          this.navigatePath();
+          this.navigateAddUserPath();
         },
       }]
     }
   }
 
-  isVisibleFeatureByRole() {
-    return this.commonFunctionService.getUserRole() === 'Admin';
-  }
-  checkUserid(id: number) {
-    return id === Number(this.userId);
-  }
 
-  navigatePath() {
+  navigateAddUserPath(): void {
     this.router.navigate(["/Ums/adduser"]);
   }
 
-  EditUserForm(user: User) {
+  editUserForm(user: User): void {
     const dialogRef = this.dialog.open(AddEditUserComponent, {
       data: {
         user: user ? { ...user } : null
@@ -210,7 +209,7 @@ export class UserComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteUser(id: number[]) {
+  deleteUser(id: number[]): void {
     const dialogRef = this.dialog.open(UserDeleteModalComponent);
     dialogRef.afterClosed().subscribe(result => {
       if (result) {

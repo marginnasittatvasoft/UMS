@@ -47,8 +47,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error occurred while checking user existence: " + ex.ToString());
-                throw;
+                throw new Exception("Error occurred while checking user existence:", ex);
             }
         }
 
@@ -69,14 +68,13 @@ namespace UMS_BusinessLogic.Repositories.Repos
                 User? user = await _userDbContext.Users.FirstOrDefaultAsync(u => u.UserName == username && !u.IsDeleted);
                 if (user == null)
                 {
-                    _logger.LogError($"User with username {username} not found");
+                    throw new Exception($"User with username {username} not found");
                 }
                 return user;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error occurred while retrieving user by username: " + ex.ToString());
-                throw;
+                throw new Exception("Error occurred while retrieving user by username: ",ex);
             }
         }
 
@@ -108,12 +106,12 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error in Getting Mutiple Users: ", ex.ToString());
-                throw;
+                throw new Exception("Error in Getting Mutiple Users: ",ex);
             }
         }
 
         #endregion
+
 
         #region CRUD Operations
 
@@ -155,8 +153,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.ToString());
-                throw;
+                throw new Exception("Error in Getting while delete Users:",ex);
             }
         }
 

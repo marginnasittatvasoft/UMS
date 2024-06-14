@@ -91,16 +91,17 @@
         <div class="row">
             <mat-form-field class="mb-3 col" appearance="outline">
                 <mat-label>Street</mat-label>
-                <input matInput type="text"
-                    formControlName="street" />
+                <textarea matInput
+                    formControlName="street"
+                    matTextareaAutosize
+                    matAutosizeMaxRows="5"></textarea>
                 @if (commonFunctionService.controlValidity(addUserForm,
-                'street')) {
+                'street')){
                 <mat-error>
                     {{ commonFunctionService.getErrorMessage(addUserForm,
                     'street', 'Street') }}
                 </mat-error>
                 }
-
             </mat-form-field>
 
             <mat-form-field class="mb-3 col" appearance="outline">

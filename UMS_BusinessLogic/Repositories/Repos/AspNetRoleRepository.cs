@@ -37,8 +37,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error occurred while retrieving all roles: " + ex.ToString());
-                throw;
+                throw new Exception("Error occurred while retrieving all roles: ", ex);
             }
         }
 
@@ -55,8 +54,7 @@ namespace UMS_BusinessLogic.Repositories.Repos
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error occurred while retrieving all roles: " + ex.ToString());
-                throw;
+                throw new Exception("Error occurred while retrieving all roles: ", ex);
             }
         }
 
