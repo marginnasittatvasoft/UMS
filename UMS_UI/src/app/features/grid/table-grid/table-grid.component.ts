@@ -47,46 +47,46 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   get showPagination() {
-    return this.config.pagination.isShowPagination ?? false;
+    return this.config.features.pagination.isShowPagination ?? false;
   }
   get pageSize() {
-    return this.defalutPageSize ?? this.config.pagination?.defaultPageSize ?? 5;
+    return this.defalutPageSize ?? this.config.features.pagination?.defaultPageSize ?? 5;
   }
 
   get showFirstLastButtons() {
-    return this.config.pagination?.isShowFirstLastButton ?? true;
+    return this.config.features.pagination?.isShowFirstLastButton ?? true;
   }
 
   get pageSizeOptions() {
-    return this.config.pagination?.pageSizeOption ?? [5, 10, 15];
+    return this.config.features.pagination?.pageSizeOption ?? [5, 10, 15];
   }
 
   get hidePageSizeOption() {
-    return this.config.pagination?.isHidePageSizeOption ?? false;
+    return this.config.features.pagination?.isHidePageSizeOption ?? false;
   }
 
   get disabledPagination() {
-    return this.config.pagination?.isDisabledPagination ?? false;
+    return this.config.features.pagination?.isDisabledPagination ?? false;
   }
 
   get disabledSorting() {
-    if (this.config.sorting.isVisibleSorting) {
-      return this.config.sorting?.disabledSorting ?? false;
+    if (this.config.features.sorting.isVisibleSorting) {
+      return this.config.features.sorting?.disabledSorting ?? false;
     }
     return true;
   }
 
   get sortActiveColumn() {
-    return this.config.sorting?.defaultSortActiveColumn;
+    return this.config.features.sorting?.defaultSortActiveColumn;
   }
 
   get sortDisabledClear() {
-    return this.config.sorting?.sortDisableClear ?? true;
+    return this.config.features.sorting?.sortDisableClear ?? true;
   }
 
   get sortDirection() {
-    if (this.config.sorting.isVisibleSortDirection) {
-      return this.config.sorting?.defaultSortingOrder ?? 'asc';
+    if (this.config.features.sorting.isVisibleSortDirection) {
+      return this.config.features.sorting?.defaultSortingOrder ?? 'asc';
     }
     return '';
   }
@@ -116,15 +116,15 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
     if (this.config) {
       this.displayedColumns = this.config.column.map(i => i.columnName);
       this.filterDataColumn = this.config.column.filter(i => i.isFilterable).map(i => i.columnName);
-      this.dataSource = new MatTableDataSource<T>(this.config.tableGridData.tableData);
+      this.dataSource = new MatTableDataSource<T>(this.config.tableData);
       this.addAnotherColumn = [...this.displayedColumns];
-      if (this.config.features.isShowSelectColumn && this.config.multipleDelete.callBack) {
+      if (this.config.features.isShowSelectColumn && this.config.features.multipleDelete.callBack) {
         this.addAnotherColumn.unshift('select');
       }
       if (this.config.actionButtons.length > 0) {
         this.addAnotherColumn.push('action');
       }
-      this.defaultSortColumn = this.config.sorting.defaultSortActiveColumn;
+      this.defaultSortColumn = this.config.features.sorting.defaultSortActiveColumn;
       this.applySorting(this.config.column.filter(x => x.isSortable).map(i => i.columnName));
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
@@ -174,7 +174,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   deleteSelectedData(): void {
-    const deleteSelectedIds = this.config.multipleDelete;
+    const deleteSelectedIds = this.config.features.multipleDelete;
     if (this.config && deleteSelectedIds) {
       if (deleteSelectedIds.callBack) {
         const selectedData = this.selection.selected.map(item => item);
@@ -190,7 +190,7 @@ export class TableGridComponent<T> implements OnInit, AfterViewInit, OnChanges {
   }
 
   isDisabledById(data: T): boolean {
-    return this.config?.features?.callBackById?.(data) ?? false;
+    return this.config?.features?.callBack?.(data) ?? false;
   }
 
 }

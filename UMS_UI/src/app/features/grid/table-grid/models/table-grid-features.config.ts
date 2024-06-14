@@ -1,23 +1,16 @@
+import { TableGridAddButtton } from "./table-grid-add-button.config";
+import { TableGridMultipleDelete } from "./table-grid-multiple-delete.config";
+import { TableGridPaginatorConfig } from "./table-grid-paginator.config";
+import { TableGridSortingConfig } from "./table-grid-sorting.config";
+
 export interface TableGridFeaturesConfig<T> {
     isShowSelectColumn?: boolean;
     isShowFilterOption?: boolean;
-    callBackById?: ((data: T) => boolean);
+    callBack?: ((data: T) => boolean);
+    pagination?: TableGridPaginatorConfig;
+    sorting?: TableGridSortingConfig;
+    multipleDelete?: TableGridMultipleDelete<T>;
+    addButton?: TableGridAddButtton<T>[];
 }
 
-export interface TableGridMultipleDelete<T> {
-    callBack(data: T[]): void;
-}
 
-export interface TableGridAddButtton<T> {
-    btnText: string;
-    color?: string;
-    isVisible?: boolean;
-    callBack(data: T): void;
-}
-
-export interface TableActionButton<T> {
-    icon: string;
-    color?: string;
-    callBack(data: T): void;
-    visibilityCallBack(data: any): void;
-}

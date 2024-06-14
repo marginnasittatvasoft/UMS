@@ -76,35 +76,44 @@ export class UserComponent implements OnInit, OnDestroy {
 
   loadTable(): void {
     this.datagridConfig = {
-      pagination: {
-        defaultPageSize: 5,
-        pageSizeOption: [5, 10, 15],
-        isShowFirstLastButton: true,
-        isHidePageSizeOption: false,
-        isDisabledPagination: false,
-        isShowPagination: this.isAdmin,
-      },
-
-      sorting: {
-        disabledSorting: false,
-        defaultSortActiveColumn: 'userName',
-        sortDisableClear: true,
-        defaultSortingOrder: 'desc',
-        isVisibleSortDirection: this.isAdmin,
-        isVisibleSorting: this.isAdmin,
-      },
-
-      tableGridData: {
-        tableData: this.user,
-      },
-
+      tableData: this.user,
       features: {
         isShowSelectColumn: this.isAdmin,
         isShowFilterOption: this.isAdmin,
-        callBackById: (data) => {
+        callBack: (data) => {
           const isDisabledByid = data.id === Number(this.userId)
           return isDisabledByid;
         },
+        pagination: {
+          defaultPageSize: 5,
+          pageSizeOption: [5, 10, 15],
+          isShowFirstLastButton: true,
+          isHidePageSizeOption: false,
+          isDisabledPagination: false,
+          isShowPagination: this.isAdmin,
+        },
+        sorting: {
+          disabledSorting: false,
+          defaultSortActiveColumn: 'userName',
+          sortDisableClear: true,
+          defaultSortingOrder: 'desc',
+          isVisibleSortDirection: this.isAdmin,
+          isVisibleSorting: this.isAdmin,
+        },
+        multipleDelete: {
+          callBack: (data) => {
+            const selectedIds = data.map(item => item.id);
+            this.deleteSelectedUsers(selectedIds);
+          },
+        },
+        addButton: [{
+          btnText: "Add User",
+          color: 'primary',
+          isVisible: this.isAdmin,
+          callBack: () => {
+            this.navigateAddUserPath();
+          },
+        }]
       },
 
       column: [
@@ -158,7 +167,7 @@ export class UserComponent implements OnInit, OnDestroy {
           callBack: (data) => {
             this.editUserForm(data);
           },
-          visibilityCallBack: (data) => {
+          disabledCallBack: (data) => {
             return false;
           }
         },
@@ -168,28 +177,12 @@ export class UserComponent implements OnInit, OnDestroy {
           callBack: (data) => {
             this.deleteUser([data.id]);
           },
-          visibilityCallBack: (data) => {
+          disabledCallBack: (data) => {
             const isDisabledByid = data.id === Number(this.userId)
             return isDisabledByid;
           }
         },
       ],
-
-      multipleDelete: {
-        callBack: (data) => {
-          const selectedIds = data.map(item => item.id);
-          this.deleteSelectedUsers(selectedIds);
-        },
-      },
-
-      addButton: [{
-        btnText: "Add User",
-        color: 'primary',
-        isVisible: this.isAdmin,
-        callBack: () => {
-          this.navigateAddUserPath();
-        },
-      }]
     }
   }
 

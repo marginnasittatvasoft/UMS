@@ -6,7 +6,7 @@
             placeholder="Search">
     </mat-form-field>
     <div class="d-flex justify-content-end">
-        <ng-container *ngFor="let button of this.config.addButton">
+        <ng-container *ngFor="let button of this.config.features.addButton">
             <button mat-raised-button [color]="button.color"
                 *ngIf="button.isVisible" (click)="button.callBack(null)"
                 class="ms-3">{{button.btnText}}</button>
@@ -60,7 +60,7 @@
             <td mat-cell *matCellDef="let data">
                 <ng-container *ngFor="let button of this.config.actionButtons">
                     <button
-                        [disabled]="button.visibilityCallBack(data)"
+                        [disabled]="button.disabledCallBack(data)"
                         mat-icon-button
                         [color]="button.color"
                         (click)="button.callBack(data)">
